@@ -145,12 +145,11 @@
   <div class="hero-inner">
     <span class="badge">📚 総合リファレンス / 2026年5月版</span>
     <h1 class="title">Claude <span class="grad">Agent Skills</span> 総合ガイド</h1>
-    <p class="lead">概要・仕組み・作り方・実際の事例・活用方法から、CLAUDE.md / MCP との違い、利点と欠点、公式スキル17種の紹介と<strong>具体的な実装方法・リンク</strong>まで——「スキル（Agent Skills）」を体系的に理解するための日本語まとめ。</p>
+    <p class="lead">Claudeに「得意分野」を覚えさせる仕組み、それが<strong>スキル（Agent Skills）</strong>です。このページは、<strong>プログラミングやClaudeにくわしくない方でも読めること</strong>を目指して、スキルとは何かから、使い方・導入のしかた・便利な例までをやさしくまとめています。</p>
     <div class="meta-row">
+      <span class="chip">🔰 初心者・非エンジニアの方も歓迎</span>
       <span class="chip">対象: Claude Code / API / Claude.ai</span>
-      <span class="chip">progressive disclosure</span>
-      <span class="chip">SKILL.md</span>
-      <span class="chip">公式スキル17種＋導入手順</span>
+      <span class="chip">公式スキル17種＋導入手順つき</span>
     </div>
   </div>
 </header>
@@ -181,23 +180,29 @@
     <!-- TLDR -->
     <section id="tldr">
       <div class="tldr">
-        <h3>★ 3行まとめ</h3>
+        <h3>★ まず知ってほしい3つのこと</h3>
         <ul>
-          <li><strong>スキルとは</strong>＝「いつ・何をするか」を書いた <code>SKILL.md</code> と、必要なスクリプト／参照資料をまとめた<strong>フォルダ単位の能力パッケージ</strong>。</li>
-          <li><strong>キモは progressive disclosure（段階的開示）</strong>＝起動時は名前と説明（約100トークン）だけ読み込み、タスクに合致した時だけ本文・付属ファイルを展開するので、コンテキストを節約しながら専門能力を持たせられる。</li>
-          <li><strong>使い分け</strong>＝常時の前提は <code>CLAUDE.md</code>、外部システムへのリアルタイム接続は <code>MCP</code>、<strong>「再利用したい手順・専門知識」はスキル</strong>。3つは競合せず補完関係。</li>
+          <li><strong>① スキルとは「Claudeに得意分野を追加する仕組み」</strong>です。たとえば「PDFを扱うのが得意」「自社の書類フォーマットを知っている」といった専門スキルを、フォルダにまとめてClaudeに渡すイメージです。</li>
+          <li><strong>② 導入で迷ったら、Claude本人に聞けば大丈夫。</strong> 「スキルってどうやって入れるの？手順を教えて」とお願いすれば、<strong>あなたのパソコンの状況に合わせて一歩ずつ案内してくれます</strong>。専門知識がなくても始められます。</li>
+          <li><strong>③ 似た機能と混ざりやすいので使い分けを。</strong> いつも覚えておいてほしい前提は <code>CLAUDE.md</code>、外部サービスとの接続は <code>MCP</code>、<strong>「くり返し使いたい作業手順や専門知識」はスキル</strong>。3つはケンカせず、組み合わせて使えます（→ <a href="#vs">06章</a>）。</li>
         </ul>
+      </div>
+      <div class="callout note">
+        <p><strong>このページの読み方：</strong> 専門用語にはかっこ書きでやさしい説明を添えています。むずかしく感じた章はとばしてOK。<strong>まず試したい方は <a href="#install">09章「実装方法」</a></strong>へ、<strong>そもそも何ができるの？という方は <a href="#catalog">08章「便利なスキル17種」</a></strong>から見るのがおすすめです。</p>
       </div>
     </section>
 
     <!-- 01 -->
     <section id="what">
       <h2><span class="sec-num">01</span>スキル（Agent Skills）とは何か</h2>
-      <p><strong>Agent Skills（エージェントスキル、略して「スキル」）</strong>とは、特定の作業手順・専門知識・関連リソース（スクリプトやテンプレート、参照ドキュメント）を <strong>ファイルシステム上のフォルダにパッケージ化</strong>して、Claude に「専門能力」を後付けする仕組みです。汎用アシスタントである Claude を、PDF処理の専門家・自社業務の担当者・特定コードベースの熟練者へと変身させます。</p>
-      <p>スキルは <a href="https://github.com/anthropics/skills" target="_blank">Agent Skills のオープン仕様</a>に基づいており、Claude Code・API・Claude.ai など複数の環境で共通の形式が使えます。Anthropic は2025年10月にこの機能を正式発表しました（→ <a href="https://www.anthropic.com/news/skills" target="_blank">Anthropic News: Skills</a>）。</p>
+      <p><strong>スキル（Agent Skills）</strong>とは、ひとことで言うと <strong>「Claudeに特定の得意分野を覚えさせるための“手順書フォルダ”」</strong>です。「こういう作業のやり方」「この分野の知識」「使ってよい道具やテンプレート」を1つのフォルダにまとめて渡しておくと、必要なときにClaudeがそれを開いて、その分野の専門家のようにふるまってくれます。</p>
+      <p>たとえば、ふだんは何でも屋のClaudeを、<strong>PDFを扱うプロ・自社の書類づくり担当・あるソフトに詳しい技術者</strong>へと“変身”させられる、というイメージです。この仕組みは <a href="https://github.com/anthropics/skills" target="_blank">公開された共通ルール（オープン仕様）</a>に沿っていて、Claude Code・API・Claude.ai のどれでも同じ形式で使えます。Anthropic が2025年10月に正式に発表しました（→ <a href="https://www.anthropic.com/news/skills" target="_blank">発表記事</a>）。</p>
 
-      <h3>核心となる考え方：Progressive Disclosure（段階的開示）</h3>
-      <p>スキル最大の特徴は、情報を<strong>一度に全部読み込まず、必要になった段階で順に開示する</strong>3層構造です。これによって「分厚いマニュアルを丸ごと持たせると重い」という問題を回避します。</p>
+      <h3>いちばんの特徴：必要なときだけ開く（段階的開示）</h3>
+      <p>スキルの賢いところは、<strong>中身を最初から全部読むのではなく、必要になった分だけ順番に開く</strong>仕組みになっている点です（むずかしく言うと「progressive disclosure＝段階的開示」）。分厚いマニュアルを丸ごと暗記させると“重く”なってしまいますが、それを避けられます。</p>
+      <div class="callout note">
+        <p><strong>用語メモ：</strong> このあと出てくる「<strong>トークン</strong>」は<em>AIが一度に読める文章量の単位</em>、「<strong>コンテキスト</strong>」は<em>AIがいま見ている情報のまとまり（作業机の広さ）</em>くらいに考えてください。スキルは、この“机”を散らかさずに専門知識を使えるのが利点です。</p>
+      </div>
       <div class="layers">
         <div class="layer">
           <div class="lvl">Lv.1</div>
@@ -270,18 +275,22 @@
 
     <!-- 02 -->
     <section id="how">
-      <h2><span class="sec-num">02</span>どう動くのか（技術的な仕組み）</h2>
+      <h2><span class="sec-num">02</span>どう動くのか（仕組み）</h2>
+      <div class="callout note">
+        <p>この章は少し技術寄りです。<strong>「なんとなく動く流れ」が分かれば十分</strong>なので、むずかしければ読み飛ばして <a href="#catalog">08章</a>・<a href="#install">09章</a>に進んでも大丈夫です。</p>
+      </div>
 
-      <h3>発見とロードの流れ</h3>
+      <h3>「気づいて → 必要な分だけ開く」の流れ</h3>
+      <p>Claudeがスキルを使うときは、ざっくり次の順番で動きます。</p>
       <ol>
-        <li><strong>起動時</strong>：Claude は利用可能な全スキルの YAML から「名前＋説明」だけを読み、system prompt に載せる。</li>
-        <li><strong>会話中</strong>：ユーザーの要求とスキルの <code>description</code> を照合し、「このスキルが該当する」と判断する。</li>
-        <li><strong>発火時</strong>：Bash／Read 系ツールでファイルシステムから <code>SKILL.md</code> 本文を読み込む。</li>
-        <li><strong>必要に応じて</strong>：本文が参照する <code>references/REFERENCE.md</code> を読み、<code>scripts/fill_form.py</code> を実行する——タスクが要求した分だけ。</li>
+        <li><strong>はじめに名前と説明だけ覚える</strong>：起動時、Claudeは各スキルの「名前」と「説明文」だけをサッと見ておきます（中身はまだ読みません）。</li>
+        <li><strong>会話中に「これだ」と気づく</strong>：あなたの依頼が、ある説明文にぴったり合うと「このスキルの出番だ」と判断します。</li>
+        <li><strong>そこで初めて中身を開く</strong>：該当した <code>SKILL.md</code> の本文（手順書）を読み込みます。</li>
+        <li><strong>足りなければ追加で開く／道具を使う</strong>：手順書が指す参照ファイルを読んだり、付属のプログラム（スクリプト）を動かしたりします——その作業に必要な分だけ。</li>
       </ol>
 
-      <h3>ファイルシステム＋コード実行が土台</h3>
-      <p>スキルはコード実行環境（ファイルシステム＋Bash）の上で動きます。重要なのは<strong>スクリプトは「読む」のではなく「実行する」</strong>点です。SKILL.md に「<code>analyze_form.py</code> を実行せよ」と書けば、Claude は <code>python scripts/analyze_form.py input.pdf</code> を実行し、<strong>スクリプトのコード本体ではなく、その出力だけ</strong>がコンテキストを消費します。決定的（deterministic）な処理をコードに任せることで、確実性とトークン効率を両立します。</p>
+      <h3>付属プログラムは「読む」のではなく「動かす」</h3>
+      <p>スキルには小さなプログラム（スクリプト）を同梱できます。ポイントは、Claudeがそれを<strong>文章として読むのではなく、実際に実行して“結果だけ”を受け取る</strong>こと。たとえば「フォームを解析するプログラムを動かして」と書いておけば、Claudeはそれを実行し、出てきた<strong>答えだけ</strong>を使います。プログラム本体の長い中身は読まないので、その分“机（コンテキスト）”が散らからず、しかも処理は正確になります。</p>
 
       <div class="callout note">
         <p><strong>コンテキスト効率の具体例：</strong> 参照ドキュメント10本を同梱したPDFスキルに対し、ユーザーが「テキストを抽出して」と頼むと、Claude は SKILL.md は読みますが、フォーム記入ガイドやリファレンスは読みません。消費トークン＝SKILL.md＋会話分のみ。スキル全体ではありません。</p>
@@ -312,7 +321,7 @@
       <div class="callout warn">
         <p><strong>サーフェス間の同期はされません。</strong> Claude Code に置いたスキルは API や Claude.ai に自動では現れません。後述のように <strong>Git をソース・オブ・トゥルースにして各環境へ配る</strong>運用が現実的です（→ <a href="#distribute">11章</a>）。</p>
       </div>
-      <p>API で利用する場合は、ベータヘッダ（例：<code>code-execution-2025-08-25</code>, <code>skills-2025-10-02</code>, <code>files-api-2025-04-14</code>）が必要で、1リクエストあたり最大8スキルまでという制限があります。</p>
+      <p style="font-size:14.5px;color:var(--fg2)">📎 <strong>（開発者向けの細かい話）</strong> API で使うときは、いくつかの“合言葉”のような設定（ベータヘッダ：<code>code-execution-2025-08-25</code>, <code>skills-2025-10-02</code>, <code>files-api-2025-04-14</code>）が必要で、1回の依頼につき最大8スキルまで、という制限があります。アプリ開発をしない方は気にしなくて大丈夫です。</p>
       <div class="linkbox">
         <h4>🔗 この章の関連リンク</h4>
         <ul>
@@ -326,8 +335,11 @@
     <!-- 04 -->
     <section id="create">
       <h2><span class="sec-num">04</span>スキルの作り方</h2>
+      <div class="callout note">
+        <p>自分でスキルを作ってみたい方向けの章です。<strong>「作るのもClaudeに手伝ってもらえる」</strong>ので、まずは「<em>こういう作業を覚えるスキルを作って</em>」とClaudeに頼むのが近道です。ここでは“作るときのコツ”を紹介します。</p>
+      </div>
 
-      <h3>置き場所</h3>
+      <h3>置き場所（どのフォルダに入れる？）</h3>
       <pre><code><span class="tok-c"># 個人用（全プロジェクトで有効）</span>
 ~/.claude/skills/my-skill/SKILL.md
 
@@ -423,7 +435,16 @@ Claude(内部): pdf スキルの説明に合致 → SKILL.md を読み込み →
     <!-- 06 -->
     <section id="vs">
       <h2><span class="sec-num">06</span>CLAUDE.md / MCP との違い</h2>
-      <p>3つはよく混同されますが、<strong>役割が異なる補完的な機能</strong>です。「ロード方式」と「用途」で整理すると分かりやすいです。</p>
+      <p>名前が似ていて混乱しやすい3つですが、役割はハッキリ違います。まずは<strong>たとえ話</strong>でイメージをつかみましょう。</p>
+      <div class="callout tip">
+        <p>Claudeを“新しく来たスタッフ”にたとえると——</p>
+        <ul style="margin:6px 0 0">
+          <li><strong>CLAUDE.md</strong>＝<em>「社内のルールブック」</em>。出社したら毎回まず目を通す、いつも守ってほしい決まりごと。</li>
+          <li><strong>スキル</strong>＝<em>「業務マニュアル集」</em>。必要なときに棚から取り出して見る、特定作業のやり方。</li>
+          <li><strong>MCP</strong>＝<em>「社内システムへのアクセス権」</em>。在庫DBやSlackなどにつないでリアルタイムでデータをやりとりするためのID。</li>
+        </ul>
+      </div>
+      <p>もう少しきちんと言うと、3つは<strong>役割の違う、補い合う機能</strong>です。「いつ読み込まれるか」と「何に使うか」で整理すると分かりやすいです。</p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>機能</th><th>置き場所</th><th>ロード方式</th><th>主な用途</th></tr></thead>
@@ -550,7 +571,13 @@ Claude(内部): pdf スキルの説明に合致 → SKILL.md を読み込み →
     <!-- 09 実装方法 -->
     <section id="install">
       <h2><span class="sec-num">09</span>実装方法（実際の導入手順）</h2>
-      <p>公式スキルや自作スキルを、各環境に<strong>実際に導入する具体的な手順</strong>です。コピペで動かせるコマンド付き。</p>
+
+      <div class="callout tip">
+        <p><strong>いちばんかんたんなのは「Claudeに聞くこと」です。🗣️</strong></p>
+        <p>下のコマンドが少しむずかしく感じても心配いりません。Claude（Claude Code や Claude.ai）に、ふつうの言葉でこう頼んでみてください：</p>
+        <p style="margin:8px 0;padding:10px 14px;background:#fff;border:1px dashed var(--border2);border-radius:8px;color:var(--fg)">「<strong>ClaudeのスキルをこのPCに入れたいです。私の環境を確認しながら、手順を1つずつ教えてください</strong>」</p>
+        <p>すると、<strong>あなたのパソコンの状態を調べて、必要なコマンドを1つずつ・コピペできる形で案内し、つまずいたら一緒に解決</strong>してくれます。以下はその「中身」を知りたい方向けの参考手順です。読み飛ばしても、Claudeに任せれば導入できます。</p>
+      </div>
 
       <h3>A. Claude Code に導入する</h3>
       <h4>方法① 公式リポジトリから手動でコピー（最も確実）</h4>
