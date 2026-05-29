@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Agent Skills 総合ガイド｜概要・仕組み・活用・MCP/CLAUDE.mdとの違い・実装方法</title>
-<meta name="description" content="ClaudeのAgent Skills(スキル)を概要から仕組み、作り方、活用法、CLAUDE.md・MCPとの違い、利点欠点、公式スキル17種の紹介と実装方法まで総合的にまとめた日本語リファレンス。">
+<title>Claude Skills やさしい総合ガイド｜Skillsとは / 使う / 作る</title>
+<meta name="description" content="ClaudeのSkills(スキル)を「とは・使う・作る」の3部構成でやさしく解説。初心者・非エンジニアでも読める日本語ガイド。仕組み、CLAUDE.md/MCPとの違い、公式17スキル、導入手順、作り方まで。">
 <style>
   :root{
-    /* light theme */
     --bg:#ffffff; --bg2:#f7f8fa; --bg3:#eef1f5; --border:#e3e8ee; --border2:#d6dde5;
     --fg:#1f2328; --fg2:#4a5560; --muted:#6e7781;
     --accent:#cc5a3a; --accent-soft:#fbeae4; --accent2:#0969da;
@@ -15,7 +14,7 @@
     --code-bg:#f6f8fa;
     --mono:'SFMono-Regular',ui-monospace,'Cascadia Code','Source Code Pro',Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
-    --radius:12px; --maxw:900px; --sidew:300px;
+    --radius:12px; --maxw:900px; --sidew:310px;
     --shadow:0 1px 3px rgba(27,31,36,.06),0 1px 2px rgba(27,31,36,.04);
   }
   *{box-sizing:border-box}
@@ -41,16 +40,27 @@
 
   /* sidebar nav */
   .nav-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;padding:0 4px 12px}
-  nav.toc a{display:block;color:var(--fg2);padding:6px 12px;border-radius:8px;font-size:14px;border-left:2px solid transparent;line-height:1.5}
+  nav.toc a{display:block;color:var(--fg2);padding:5px 12px;border-radius:8px;font-size:14px;border-left:2px solid transparent;line-height:1.5}
   nav.toc a:hover{background:var(--bg2);text-decoration:none;color:var(--fg)}
   nav.toc a.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-soft);font-weight:600}
-  nav.toc .num{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:8px;font-size:12px}
+  nav.toc a.sub{padding-left:26px;font-size:13.5px}
+  nav.toc .grp{font-weight:800;color:var(--fg);font-size:13px;padding:14px 12px 4px;letter-spacing:.02em;display:flex;align-items:center;gap:7px}
+  nav.toc .grp .gn{display:inline-flex;width:20px;height:20px;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:6px;font-size:11px}
+  nav.toc a.top{font-weight:600;color:var(--fg)}
 
-  /* sections */
-  section{scroll-margin-top:24px;margin-bottom:56px}
-  h2{font-size:27px;font-weight:800;margin:8px 0 20px;padding-bottom:12px;border-bottom:2px solid var(--border);letter-spacing:-.01em}
-  h2 .sec-num{color:var(--accent);font-size:18px;font-weight:700;margin-right:10px;font-variant-numeric:tabular-nums}
-  h3{font-size:20px;font-weight:700;margin:32px 0 12px;color:var(--fg)}
+  /* part divider */
+  .part{margin:56px 0 24px;padding:24px 26px;border-radius:16px;background:linear-gradient(135deg,#fff3ee,#eef4fd);border:1px solid var(--border2);box-shadow:var(--shadow);scroll-margin-top:24px}
+  .part:first-of-type{margin-top:24px}
+  .part .pt-label{font-size:13px;font-weight:800;letter-spacing:.1em;color:var(--accent);margin-bottom:6px}
+  .part h2{font-size:30px;font-weight:800;margin:0;border:none;padding:0;display:flex;align-items:center;gap:14px}
+  .part h2 .pt-no{display:inline-flex;width:42px;height:42px;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:12px;font-size:20px;flex:0 0 auto}
+  .part .pt-desc{margin:10px 0 0;color:var(--fg2);font-size:15px}
+
+  /* subsections */
+  section{scroll-margin-top:24px;margin-bottom:48px}
+  h2.sub-h{font-size:24px;font-weight:800;margin:8px 0 18px;padding-bottom:11px;border-bottom:2px solid var(--border);letter-spacing:-.01em}
+  h2.sub-h .sec-num{color:var(--accent);font-size:16px;font-weight:700;margin-right:10px;font-variant-numeric:tabular-nums}
+  h3{font-size:19px;font-weight:700;margin:30px 0 12px;color:var(--fg)}
   h4{font-size:16px;font-weight:700;margin:22px 0 8px;color:var(--fg2)}
   p{margin:0 0 16px}
   ul,ol{margin:0 0 16px;padding-left:24px}
@@ -62,11 +72,11 @@
   code{font-family:var(--mono);background:var(--bg3);padding:2px 6px;border-radius:5px;font-size:.86em;color:#a4422a;border:1px solid var(--border)}
   pre{background:var(--code-bg);border:1px solid var(--border2);border-radius:var(--radius);padding:18px 20px;overflow-x:auto;margin:0 0 20px;line-height:1.6}
   pre code{background:none;padding:0;color:#1f2328;font-size:13.5px;border:none}
-  .tok-c{color:#6e7781}      /* comment */
-  .tok-k{color:#cf222e}      /* keyword */
-  .tok-s{color:#0a3069}      /* string */
-  .tok-y{color:#0550ae}      /* yaml key */
-  .tok-f{color:#8250df}      /* func */
+  .tok-c{color:#6e7781}
+  .tok-k{color:#cf222e}
+  .tok-s{color:#0a3069}
+  .tok-y{color:#0550ae}
+  .tok-f{color:#8250df}
 
   /* tables */
   .table-wrap{overflow-x:auto;border:1px solid var(--border2);border-radius:var(--radius);margin:0 0 22px;box-shadow:var(--shadow)}
@@ -89,6 +99,8 @@
   .callout.danger::before{content:"🔒"}
   .callout.note{background:#eef4fd;border-color:#bcd5f5}
   .callout.note::before{content:"📌"}
+  .callout.ask{background:#f3eefe;border-color:#d4c4f5}
+  .callout.ask::before{content:"🗣️"}
 
   /* cards */
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:0 0 22px}
@@ -113,16 +125,16 @@
   .tree .f{color:#a4422a}
   .tree .cm{color:var(--muted)}
 
-  /* TL;DR box */
-  .tldr{background:linear-gradient(135deg,#fff6f2,#f2f7fd);border:1px solid var(--border2);border-radius:var(--radius);padding:22px 24px;margin:0 0 32px;box-shadow:var(--shadow)}
+  /* boxes */
+  .tldr{background:linear-gradient(135deg,#fff6f2,#f2f7fd);border:1px solid var(--border2);border-radius:var(--radius);padding:22px 24px;margin:0 0 22px;box-shadow:var(--shadow)}
   .tldr h3{margin-top:0}
   .tldr ul{margin-bottom:0}
-
-  /* link list block */
-  .linkbox{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px 14px 20px;margin:0 0 22px}
+  .askbox{margin:8px 0;padding:10px 14px;background:#fff;border:1px dashed var(--border2);border-radius:8px;color:var(--fg)}
+  .linkbox{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin:0 0 22px}
   .linkbox h4{margin:4px 0 8px;color:var(--fg)}
   .linkbox ul{margin:0;padding-left:20px}
   .linkbox li{margin:4px 0;font-size:14.5px}
+  .devnote{font-size:14.5px;color:var(--fg2)}
 
   footer{border-top:1px solid var(--border);padding:32px 0;color:var(--muted);font-size:13px;text-align:center;margin-top:40px}
   .src-list{font-size:13.5px}
@@ -143,12 +155,13 @@
 
 <header class="hero">
   <div class="hero-inner">
-    <span class="badge">📚 総合リファレンス / 2026年5月版</span>
-    <h1 class="title">Claude <span class="grad">Agent Skills</span> 総合ガイド</h1>
-    <p class="lead">Claudeに「得意分野」を覚えさせる仕組み、それが<strong>スキル（Agent Skills）</strong>です。このページは、<strong>プログラミングやClaudeにくわしくない方でも読めること</strong>を目指して、スキルとは何かから、使い方・導入のしかた・便利な例までをやさしくまとめています。</p>
+    <span class="badge">🔰 やさしい総合ガイド / 2026年版</span>
+    <h1 class="title">Claude <span class="grad">Skills</span> やさしいガイド</h1>
+    <p class="lead">Claudeに「得意分野」を覚えさせる仕組み、それが<strong>スキル（Skills）</strong>です。このページは<strong>プログラミングやClaudeにくわしくない方でも読めること</strong>を目指し、内容を <strong>①Skillsとは ②Skillsを使う ③Skillsを作る</strong> の3つに分けてやさしく解説します。</p>
     <div class="meta-row">
-      <span class="chip">🔰 初心者・非エンジニアの方も歓迎</span>
-      <span class="chip">対象: Claude Code / API / Claude.ai</span>
+      <span class="chip">① とは</span>
+      <span class="chip">② 使う</span>
+      <span class="chip">③ 作る</span>
       <span class="chip">公式スキル17種＋導入手順つき</span>
     </div>
   </div>
@@ -158,633 +171,522 @@
   <aside class="sidebar">
     <div class="nav-title">目次</div>
     <nav class="toc" id="toc">
-      <a href="#tldr"><span class="num">★</span>3行まとめ</a>
-      <a href="#what"><span class="num">01</span>スキルとは何か</a>
-      <a href="#how"><span class="num">02</span>仕組み（技術的詳細）</a>
-      <a href="#where"><span class="num">03</span>どこで使えるか</a>
-      <a href="#create"><span class="num">04</span>スキルの作り方</a>
-      <a href="#invoke"><span class="num">05</span>呼び出し・利用方法</a>
-      <a href="#vs"><span class="num">06</span>CLAUDE.md / MCP との違い</a>
-      <a href="#examples"><span class="num">07</span>実際の事例・ユースケース</a>
-      <a href="#catalog"><span class="num">08</span>公式スキル17種カタログ</a>
-      <a href="#install"><span class="num">09</span>実装方法（導入手順）</a>
-      <a href="#proscons"><span class="num">10</span>利点と欠点・制限</a>
-      <a href="#distribute"><span class="num">11</span>配布・チーム共有・公開</a>
-      <a href="#deploy"><span class="num">12</span>このページをVercelで公開</a>
-      <a href="#sources"><span class="num">▼</span>参考リンク集</a>
+      <a class="top" href="#intro">はじめに（3つのポイント）</a>
+
+      <div class="grp"><span class="gn">1</span>Skillsとは</div>
+      <a class="sub" href="#what">スキルってなに？</a>
+      <a class="sub" href="#how">仕組み：必要なときだけ開く</a>
+      <a class="sub" href="#skillmd">スキルの中身（SKILL.md）</a>
+      <a class="sub" href="#vs">似た機能との違い</a>
+      <a class="sub" href="#pros">メリットと注意点</a>
+
+      <div class="grp"><span class="gn">2</span>Skillsを使う</div>
+      <a class="sub" href="#where">どこで使える？</a>
+      <a class="sub" href="#catalog">便利なスキル17種</a>
+      <a class="sub" href="#install">導入のしかた</a>
+      <a class="sub" href="#invoke">呼び出し方</a>
+      <a class="sub" href="#examples">活用事例</a>
+
+      <div class="grp"><span class="gn">3</span>Skillsを作る</div>
+      <a class="sub" href="#create">作り方の流れ</a>
+      <a class="sub" href="#desc">説明文の書き方</a>
+      <a class="sub" href="#template">ひな形を作る</a>
+      <a class="sub" href="#distribute">チームに配る</a>
+
+      <div class="grp">付録</div>
+      <a class="sub" href="#deploy">このページを公開する</a>
+      <a class="sub" href="#sources">参考リンク集</a>
     </nav>
   </aside>
 
   <main class="content">
 
-    <!-- TLDR -->
-    <section id="tldr">
+    <!-- はじめに -->
+    <section id="intro">
       <div class="tldr">
         <h3>★ まず知ってほしい3つのこと</h3>
         <ul>
-          <li><strong>① スキルとは「Claudeに得意分野を追加する仕組み」</strong>です。たとえば「PDFを扱うのが得意」「自社の書類フォーマットを知っている」といった専門スキルを、フォルダにまとめてClaudeに渡すイメージです。</li>
+          <li><strong>① スキルとは「Claudeに得意分野を追加する仕組み」</strong>です。「PDFを扱うのが得意」「自社の書類フォーマットを知っている」といった専門スキルを、フォルダにまとめてClaudeに渡すイメージ。</li>
           <li><strong>② 導入で迷ったら、Claude本人に聞けば大丈夫。</strong> 「スキルってどうやって入れるの？手順を教えて」とお願いすれば、<strong>あなたのパソコンの状況に合わせて一歩ずつ案内してくれます</strong>。専門知識がなくても始められます。</li>
-          <li><strong>③ 似た機能と混ざりやすいので使い分けを。</strong> いつも覚えておいてほしい前提は <code>CLAUDE.md</code>、外部サービスとの接続は <code>MCP</code>、<strong>「くり返し使いたい作業手順や専門知識」はスキル</strong>。3つはケンカせず、組み合わせて使えます（→ <a href="#vs">06章</a>）。</li>
+          <li><strong>③ 似た機能と使い分けを。</strong> いつも覚えておく前提は <code>CLAUDE.md</code>、外部サービスとの接続は <code>MCP</code>、<strong>くり返し使う作業手順や専門知識はスキル</strong>。3つは組み合わせて使えます。</li>
         </ul>
       </div>
       <div class="callout note">
-        <p><strong>このページの読み方：</strong> 専門用語にはかっこ書きでやさしい説明を添えています。むずかしく感じた章はとばしてOK。<strong>まず試したい方は <a href="#install">09章「実装方法」</a></strong>へ、<strong>そもそも何ができるの？という方は <a href="#catalog">08章「便利なスキル17種」</a></strong>から見るのがおすすめです。</p>
+        <p><strong>このページの読み方：</strong> 全体を <strong>①とは → ②使う → ③作る</strong> の3部に分けています。専門用語にはかっこ書きでやさしい説明つき。むずかしい所はとばしてOK。<strong>すぐ試したい方は <a href="#install">「導入のしかた」</a></strong>、<strong>何ができるか知りたい方は <a href="#catalog">「便利なスキル17種」</a></strong>からどうぞ。</p>
       </div>
     </section>
 
-    <!-- 01 -->
-    <section id="what">
-      <h2><span class="sec-num">01</span>スキル（Agent Skills）とは何か</h2>
-      <p><strong>スキル（Agent Skills）</strong>とは、ひとことで言うと <strong>「Claudeに特定の得意分野を覚えさせるための“手順書フォルダ”」</strong>です。「こういう作業のやり方」「この分野の知識」「使ってよい道具やテンプレート」を1つのフォルダにまとめて渡しておくと、必要なときにClaudeがそれを開いて、その分野の専門家のようにふるまってくれます。</p>
-      <p>たとえば、ふだんは何でも屋のClaudeを、<strong>PDFを扱うプロ・自社の書類づくり担当・あるソフトに詳しい技術者</strong>へと“変身”させられる、というイメージです。この仕組みは <a href="https://github.com/anthropics/skills" target="_blank">公開された共通ルール（オープン仕様）</a>に沿っていて、Claude Code・API・Claude.ai のどれでも同じ形式で使えます。Anthropic が2025年10月に正式に発表しました（→ <a href="https://www.anthropic.com/news/skills" target="_blank">発表記事</a>）。</p>
+    <!-- ============ PART 1 ============ -->
+    <div class="part" id="part1">
+      <div class="pt-label">PART 1</div>
+      <h2><span class="pt-no">1</span>Skills とは</h2>
+      <p class="pt-desc">そもそもスキルって何？ どう動くの？ よく似た機能とどう違うの？——まずは「正体」を理解します。</p>
+    </div>
 
-      <h3>いちばんの特徴：必要なときだけ開く（段階的開示）</h3>
+    <!-- 1.1 -->
+    <section id="what">
+      <h2 class="sub-h"><span class="sec-num">1.1</span>スキルってなに？</h2>
+      <p>スキル（Agent Skills）とは、ひとことで言うと <strong>「Claudeに特定の得意分野を覚えさせるための“手順書フォルダ”」</strong>です。「こういう作業のやり方」「この分野の知識」「使ってよい道具やテンプレート」を1つのフォルダにまとめて渡しておくと、必要なときにClaudeがそれを開いて、その分野の専門家のようにふるまってくれます。</p>
+      <p>たとえば、ふだんは何でも屋のClaudeを、<strong>PDFを扱うプロ・自社の書類づくり担当・あるソフトに詳しい技術者</strong>へと“変身”させられる、というイメージです。この仕組みは <a href="https://github.com/anthropics/skills" target="_blank">公開された共通ルール（オープン仕様）</a>に沿っていて、Claude Code・API・Claude.ai のどれでも同じ形式で使えます。Anthropic が2025年10月に正式発表しました（→ <a href="https://www.anthropic.com/news/skills" target="_blank">発表記事</a>）。</p>
+    </section>
+
+    <!-- 1.2 -->
+    <section id="how">
+      <h2 class="sub-h"><span class="sec-num">1.2</span>仕組み：必要なときだけ開く</h2>
       <p>スキルの賢いところは、<strong>中身を最初から全部読むのではなく、必要になった分だけ順番に開く</strong>仕組みになっている点です（むずかしく言うと「progressive disclosure＝段階的開示」）。分厚いマニュアルを丸ごと暗記させると“重く”なってしまいますが、それを避けられます。</p>
       <div class="callout note">
-        <p><strong>用語メモ：</strong> このあと出てくる「<strong>トークン</strong>」は<em>AIが一度に読める文章量の単位</em>、「<strong>コンテキスト</strong>」は<em>AIがいま見ている情報のまとまり（作業机の広さ）</em>くらいに考えてください。スキルは、この“机”を散らかさずに専門知識を使えるのが利点です。</p>
+        <p><strong>用語メモ：</strong>「<strong>トークン</strong>」は<em>AIが一度に読める文章量の単位</em>、「<strong>コンテキスト</strong>」は<em>AIがいま見ている情報のまとまり（作業机の広さ）</em>くらいに考えてください。スキルは、この“机”を散らかさずに専門知識を使えるのが利点です。</p>
       </div>
+      <p>具体的には、次の3段階で「必要な分だけ」開いていきます。</p>
       <div class="layers">
         <div class="layer">
-          <div class="lvl">Lv.1</div>
-          <div class="body"><b>メタデータ（名前＋説明）</b><span>セッション起動時に全スキル分が system prompt に常駐。Claude は「このタスクにこのスキルが要るか」を説明文だけで判断する。</span></div>
-          <div class="cost">≈ 100 tok / スキル</div>
+          <div class="lvl">1段目</div>
+          <div class="body"><b>名前と説明だけ覚える</b><span>起動時、Claudeは各スキルの「名前」と「ひとこと説明」だけをサッと見ておく（中身はまだ読まない）。</span></div>
+          <div class="cost">≈ 100 tok / 個</div>
         </div>
         <div class="layer">
-          <div class="lvl">Lv.2</div>
-          <div class="body"><b>本文（SKILL.md の手順）</b><span>スキルが「発火」した時だけ読み込まれる、具体的な手順・ガイダンス。</span></div>
-          <div class="cost">通常 &lt; 5k tok</div>
+          <div class="lvl">2段目</div>
+          <div class="body"><b>合致したら中身を開く</b><span>あなたの依頼が説明にぴったり合うと「出番だ」と判断し、手順書（SKILL.md）の本文を読み込む。</span></div>
+          <div class="cost">通常 &lt; 5,000 tok</div>
         </div>
         <div class="layer">
-          <div class="lvl">Lv.3+</div>
-          <div class="body"><b>付属リソース（参照ファイル・スクリプト・データ）</b><span>SKILL.md から参照された時だけ読む／実行する。スクリプトは「コード本体」ではなく「出力」だけがトークンを消費する。</span></div>
+          <div class="lvl">3段目</div>
+          <div class="body"><b>足りなければ追加で開く・道具を動かす</b><span>参照ファイルを読んだり、付属プログラムを実行したり——その作業に必要な分だけ。</span></div>
           <div class="cost">実質ほぼ無制限</div>
         </div>
       </div>
       <div class="callout tip">
-        <p>結果として、スキルには大量のAPIリファレンスやデータセットを同梱しても、<strong>実際にアクセスするまでトークンを消費しません</strong>。これがスキルが「軽いのに物知り」でいられる理由です。</p>
+        <p>この仕組みのおかげで、スキルに大量の資料やデータを同梱しても、<strong>実際に使うまでは“机”を圧迫しません</strong>。スキルが「軽いのに物知り」でいられる理由です。</p>
       </div>
+      <h3>付属プログラムは「読む」のではなく「動かす」</h3>
+      <p>スキルには小さなプログラム（スクリプト）を同梱できます。ポイントは、Claudeがそれを<strong>文章として読むのではなく、実際に実行して“結果だけ”を受け取る</strong>こと。たとえば「フォームを解析するプログラムを動かして」と書いておけば、Claudeはそれを実行し、出てきた<strong>答えだけ</strong>を使います。長いプログラム本体は読まないので、机が散らからず、処理も正確になります。</p>
+      <div class="linkbox">
+        <h4>🔗 もっと知りたい人へ</h4>
+        <ul>
+          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview" target="_blank">Agent Skills Overview（公式・概要と設計思想）</a></li>
+          <li><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank">Engineering Blog: Agent Skills の設計背景</a></li>
+        </ul>
+      </div>
+    </section>
 
-      <h3>SKILL.md の構造</h3>
-      <p>すべてのスキルは <code>SKILL.md</code> を必須とし、先頭の YAML フロントマター（メタデータ）＋ Markdown 本文（手順）で構成されます。</p>
+    <!-- 1.3 -->
+    <section id="skillmd">
+      <h2 class="sub-h"><span class="sec-num">1.3</span>スキルの中身（SKILL.md とフォルダ）</h2>
+      <p>スキルは「フォルダ」です。中で必ず必要なのは <code>SKILL.md</code> という1枚のファイルだけ。冒頭に「名前・説明」などの<strong>見出し情報</strong>、その下に<strong>やり方の手順</strong>を書きます。</p>
       <pre><code><span class="tok-c">---</span>
-<span class="tok-y">name:</span> processing-pdfs
-<span class="tok-y">description:</span> Extract text and tables from PDF files, fill forms, merge
-  documents. Use when working with PDF files or when the user mentions
-  PDFs, forms, or document extraction.
+<span class="tok-y">name:</span> processing-pdfs                <span class="tok-c"># スキルの名前</span>
+<span class="tok-y">description:</span> PDFからテキストや表を取り出し、フォーム記入や結合を行う。
+  PDFやフォーム、書類の抽出が話題に出たら使う。   <span class="tok-c"># ← 「何を・いつ」を書く（最重要）</span>
 <span class="tok-c">---</span>
 
 <span class="tok-k"># PDF Processing</span>
 
-具体的な手順・例・ワークフローを Markdown で記述...</code></pre>
+ここに具体的な手順・例・ワークフローを書く...</code></pre>
 
-      <h4>必須フィールド</h4>
+      <h4>必ず書く2項目</h4>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>フィールド</th><th>制約</th><th>役割・ポイント</th></tr></thead>
+          <thead><tr><th>項目</th><th>役割（やさしく）</th><th>ルール</th></tr></thead>
           <tbody>
-            <tr><td><code>name</code></td><td>最大64文字／小文字・数字・ハイフンのみ／<code>anthropic</code> <code>claude</code> は予約語で不可</td><td>スキルの識別子。動名詞（〜ing）形が推奨：<code>processing-pdfs</code>, <code>analyzing-spreadsheets</code></td></tr>
-            <tr><td><code>description</code></td><td>最大1024文字／空不可／三人称で記述</td><td><strong>最重要</strong>。Claude が本文を読む前に見る唯一の情報。「<strong>何をするか</strong>」＋「<strong>いつ使うか</strong>」を具体的に書く（→ <a href="#create">04章</a>）</td></tr>
+            <tr><td><code>name</code></td><td>スキルの名前（呼び出すときの目印）</td><td>小文字・数字・ハイフンのみ／64文字以内。例：<code>processing-pdfs</code></td></tr>
+            <tr><td><code>description</code></td><td><strong>最重要。</strong>Claudeが中身を読む前に見る唯一の手がかり。「<strong>何をする</strong>」＋「<strong>いつ使う</strong>」を書く</td><td>1024文字以内（書き方は<a href="#desc">3.2</a>で詳しく）</td></tr>
           </tbody>
         </table>
       </div>
-      <p>このほか Claude Code の拡張として <code>allowed-tools</code>（使用可能ツールの制限）や <code>disable-model-invocation: true</code>（自動発火を無効化し明示呼び出し専用にする）などのオプションがあります。</p>
 
-      <h4>フォルダ構成</h4>
-      <p>スキルは「フォルダ」です。<code>SKILL.md</code> だけが必須で、それ以外は任意。慣習的なサブフォルダは次の通りです。</p>
+      <h4>フォルダの中身（SKILL.md 以外は任意）</h4>
       <div class="tree">
 <span class="d">processing-pdfs/</span>
-├── <span class="f">SKILL.md</span>            <span class="cm"># 必須：手順 + YAMLフロントマター</span>
-├── <span class="d">scripts/</span>            <span class="cm"># 任意：実行コード(Python/Bash)。出力だけが文脈に載る</span>
-│   ├── <span class="f">analyze_form.py</span>
+├── <span class="f">SKILL.md</span>            <span class="cm"># 必須：名前・説明＋手順</span>
+├── <span class="d">scripts/</span>            <span class="cm"># 任意：実行する小さなプログラム</span>
 │   └── <span class="f">fill_form.py</span>
-├── <span class="d">references/</span>         <span class="cm"># 任意：必要時だけ読む詳細ドキュメント</span>
-│   ├── <span class="f">FORMS.md</span>
-│   └── <span class="f">REFERENCE.md</span>
-└── <span class="d">assets/</span>             <span class="cm"># 任意：出力に使うテンプレート・アイコン等</span>
+├── <span class="d">references/</span>         <span class="cm"># 任意：必要なときだけ読む詳しい資料</span>
+│   └── <span class="f">FORMS.md</span>
+└── <span class="d">assets/</span>             <span class="cm"># 任意：出力に使うテンプレートや画像</span>
     └── <span class="f">template.docx</span>
       </div>
-      <div class="linkbox">
-        <h4>🔗 この章の関連リンク</h4>
-        <ul>
-          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview" target="_blank">Agent Skills Overview（公式・概要と設計思想）</a></li>
-          <li><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank">Engineering Blog: Equipping agents with Agent Skills（設計の背景）</a></li>
-          <li><a href="https://github.com/anthropics/skills/tree/main/spec" target="_blank">Agent Skills 仕様（spec/・GitHub）</a> ／ <a href="https://github.com/anthropics/skills/tree/main/template" target="_blank">新規作成テンプレート（template/）</a></li>
-        </ul>
-      </div>
+      <p style="font-size:14.5px;color:var(--fg2)">この“フォルダごと”がスキルです。中身を見たい場合は、後半の<a href="#catalog">公式スキル17種</a>から実物を覗けます。</p>
     </section>
 
-    <!-- 02 -->
-    <section id="how">
-      <h2><span class="sec-num">02</span>どう動くのか（仕組み）</h2>
-      <div class="callout note">
-        <p>この章は少し技術寄りです。<strong>「なんとなく動く流れ」が分かれば十分</strong>なので、むずかしければ読み飛ばして <a href="#catalog">08章</a>・<a href="#install">09章</a>に進んでも大丈夫です。</p>
-      </div>
-
-      <h3>「気づいて → 必要な分だけ開く」の流れ</h3>
-      <p>Claudeがスキルを使うときは、ざっくり次の順番で動きます。</p>
-      <ol>
-        <li><strong>はじめに名前と説明だけ覚える</strong>：起動時、Claudeは各スキルの「名前」と「説明文」だけをサッと見ておきます（中身はまだ読みません）。</li>
-        <li><strong>会話中に「これだ」と気づく</strong>：あなたの依頼が、ある説明文にぴったり合うと「このスキルの出番だ」と判断します。</li>
-        <li><strong>そこで初めて中身を開く</strong>：該当した <code>SKILL.md</code> の本文（手順書）を読み込みます。</li>
-        <li><strong>足りなければ追加で開く／道具を使う</strong>：手順書が指す参照ファイルを読んだり、付属のプログラム（スクリプト）を動かしたりします——その作業に必要な分だけ。</li>
-      </ol>
-
-      <h3>付属プログラムは「読む」のではなく「動かす」</h3>
-      <p>スキルには小さなプログラム（スクリプト）を同梱できます。ポイントは、Claudeがそれを<strong>文章として読むのではなく、実際に実行して“結果だけ”を受け取る</strong>こと。たとえば「フォームを解析するプログラムを動かして」と書いておけば、Claudeはそれを実行し、出てきた<strong>答えだけ</strong>を使います。プログラム本体の長い中身は読まないので、その分“机（コンテキスト）”が散らからず、しかも処理は正確になります。</p>
-
-      <div class="callout note">
-        <p><strong>コンテキスト効率の具体例：</strong> 参照ドキュメント10本を同梱したPDFスキルに対し、ユーザーが「テキストを抽出して」と頼むと、Claude は SKILL.md は読みますが、フォーム記入ガイドやリファレンスは読みません。消費トークン＝SKILL.md＋会話分のみ。スキル全体ではありません。</p>
-      </div>
-      <div class="linkbox">
-        <h4>🔗 この章の関連リンク</h4>
-        <ul>
-          <li><a href="https://code.claude.com/docs/en/how-claude-code-works" target="_blank">How Claude Code works（コンテキスト管理とエージェントループ）</a></li>
-          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/code-execution-tool" target="_blank">Code Execution Tool（スキルが動く実行環境）</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 03 -->
-    <section id="where">
-      <h2><span class="sec-num">03</span>どこで使えるか</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>環境</th><th>事前ビルド済みスキル</th><th>カスタムスキルの置き場／登録</th><th>共有範囲</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Claude Code (CLI)</strong></td><td>プラグイン経由</td><td><code>~/.claude/skills/</code>(個人)・<code>.claude/skills/</code>(プロジェクト)</td><td>個人 / プロジェクト / プラグイン・Git共有</td></tr>
-            <tr><td><strong>Claude API / Platform</strong></td><td>pptx, xlsx, docx, pdf</td><td><code>/v1/skills</code> エンドポイントにアップロード</td><td>ワークスペース全体</td></tr>
-            <tr><td><strong>Claude.ai (Web/App)</strong></td><td>自動（裏で利用）</td><td>設定からzipでアップロード</td><td>個人のみ（組織管理・同期なし）</td></tr>
-            <tr><td><strong>AWS / Microsoft Foundry</strong></td><td>対応</td><td>Skills API（APIと同様）</td><td>ワークスペース</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="callout warn">
-        <p><strong>サーフェス間の同期はされません。</strong> Claude Code に置いたスキルは API や Claude.ai に自動では現れません。後述のように <strong>Git をソース・オブ・トゥルースにして各環境へ配る</strong>運用が現実的です（→ <a href="#distribute">11章</a>）。</p>
-      </div>
-      <p style="font-size:14.5px;color:var(--fg2)">📎 <strong>（開発者向けの細かい話）</strong> API で使うときは、いくつかの“合言葉”のような設定（ベータヘッダ：<code>code-execution-2025-08-25</code>, <code>skills-2025-10-02</code>, <code>files-api-2025-04-14</code>）が必要で、1回の依頼につき最大8スキルまで、という制限があります。アプリ開発をしない方は気にしなくて大丈夫です。</p>
-      <div class="linkbox">
-        <h4>🔗 この章の関連リンク</h4>
-        <ul>
-          <li><a href="https://code.claude.com/docs/en/skills" target="_blank">Claude Code: Extend Claude with skills</a></li>
-          <li><a href="https://platform.claude.com/docs/en/build-with-claude/skills-guide" target="_blank">Claude API: Using Skills（/v1/skills の利用）</a></li>
-          <li><a href="https://support.claude.com/en/articles/12512212-getting-started-with-skills-on-claude-ai" target="_blank">Claude.ai: スキルの始め方（ヘルプセンター）</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 04 -->
-    <section id="create">
-      <h2><span class="sec-num">04</span>スキルの作り方</h2>
-      <div class="callout note">
-        <p>自分でスキルを作ってみたい方向けの章です。<strong>「作るのもClaudeに手伝ってもらえる」</strong>ので、まずは「<em>こういう作業を覚えるスキルを作って</em>」とClaudeに頼むのが近道です。ここでは“作るときのコツ”を紹介します。</p>
-      </div>
-
-      <h3>置き場所（どのフォルダに入れる？）</h3>
-      <pre><code><span class="tok-c"># 個人用（全プロジェクトで有効）</span>
-~/.claude/skills/my-skill/SKILL.md
-
-<span class="tok-c"># プロジェクト用（そのリポジトリ内のみ。チームでGit共有しやすい）</span>
-./.claude/skills/my-skill/SKILL.md</code></pre>
-
-      <h3>作成の流れ</h3>
-      <ol>
-        <li><strong>反復パターンを見つける</strong>：毎回同じ指示を貼り付けている、と気づいたらそれがスキル候補。</li>
-        <li><code>mkdir -p ~/.claude/skills/skill-name</code> でフォルダ作成。</li>
-        <li><code>SKILL.md</code> にフロントマター＋手順を書く。</li>
-        <li>必要なら <code>references/</code> <code>scripts/</code> <code>assets/</code> を追加。</li>
-        <li><code>/skill-name</code> で手動起動、または自動発火を確認してテスト。</li>
-        <li>実際の使われ方を見て改善（イテレーション）。</li>
-      </ol>
-      <div class="callout tip">
-        <p><strong>ゼロから書く必要はありません。</strong> Claude Code で <code>/skills</code> を使うか、Anthropic公式の <a href="https://github.com/anthropics/skills/tree/main/skills/skill-creator" target="_blank"><strong>skill-creator</strong></a>（スキルを作るスキル）を導入すれば、適切なフロントマター・構成・評価（eval）まで含めてClaudeに作らせられます（→ <a href="#catalog">08章</a>・<a href="#install">09章</a>）。</p>
-      </div>
-
-      <h3>説明文（description）の書き方——ここが成否を分ける</h3>
-      <p>description はスキルが発見される<strong>唯一のチャンス</strong>です。「何をするか（動作）」＋「いつ使うか（トリガー条件）」を、<strong>三人称・具体的</strong>に書きます。</p>
-      <div class="cards">
-        <div class="card">
-          <h4>✅ 良い例</h4>
-          <p>"Extract text and tables from PDF files, fill forms, merge documents. <strong>Use when</strong> working with PDF files or when the user mentions PDFs, forms, or document extraction."</p>
-        </div>
-        <div class="card">
-          <h4>❌ 悪い例</h4>
-          <p>"Helps with documents"（曖昧）／"Processes data"（いつ使うか不明）／"Does stuff with files"（不明確）</p>
-        </div>
-      </div>
-
-      <h3>本文の構成（progressive disclosure を活かす）</h3>
-      <ul>
-        <li><strong>SKILL.md 本文は500行以内</strong>を目安に。長い内容は別ファイルに分け、本文から参照する。</li>
-        <li><strong>参照は1階層まで</strong>：<code>SKILL.md → reference.md</code> はOK。<code>SKILL.md → a.md → b.md → 本題</code> のような深いネストは、Claude が途中までしか読まないことがある。</li>
-        <li>パスは<strong>常にスラッシュ</strong>（<code>scripts/helper.py</code>）。Windows形式のバックスラッシュは不可。</li>
-        <li>ファイル名は説明的に（<code>form_validation_rules.md</code>。<code>doc2.md</code> はNG）。100行を超える参照ファイルには目次を付ける。</li>
-        <li>モデルごと（Haiku/Sonnet/Opus）に効きが違うので、複数モデルでテストする。Haiku ほど明示的な指示が必要。</li>
-      </ul>
-
-      <h3>API でカスタムスキルを作成</h3>
-      <pre><code><span class="tok-k">from</span> anthropic.lib <span class="tok-k">import</span> files_from_dir
-client = anthropic.Anthropic()
-
-skill = client.beta.skills.<span class="tok-f">create</span>(
-    display_title=<span class="tok-s">"Financial Analysis"</span>,
-    files=<span class="tok-f">files_from_dir</span>(<span class="tok-s">"/path/to/financial_analysis_skill"</span>),
-)
-<span class="tok-f">print</span>(skill.id, skill.latest_version)   <span class="tok-c"># skill_01AbCd...</span></code></pre>
-      <p>ルートに <code>SKILL.md</code> を含み、合計30MB未満であること。新バージョンは <code>skills.versions.create()</code> で作り、<code>container</code> 内で <code>"latest"</code> またはバージョン指定して利用します。</p>
-      <div class="linkbox">
-        <h4>🔗 この章の関連リンク</h4>
-        <ul>
-          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices" target="_blank">Agent Skills Best Practices（命名・説明文・構成の公式ガイド）</a></li>
-          <li><a href="https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf" target="_blank">The Complete Guide to Building Skills for Claude（PDF・完全ガイド）</a></li>
-          <li><a href="https://anthropic.skilljar.com/introduction-to-agent-skills" target="_blank">Introduction to agent skills（無料コース・Anthropic Academy）</a></li>
-          <li><a href="https://platform.claude.com/docs/en/api/skills/create-skill" target="_blank">Skills API リファレンス（create / list / versions など）</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 05 -->
-    <section id="invoke">
-      <h2><span class="sec-num">05</span>呼び出し・利用方法</h2>
-
-      <h3>① 自動発火（デフォルト）</h3>
-      <p>ユーザーの要求が description に合致すると、Claude が<strong>自動的に</strong>スキルを読み込んで実行します。コマンド入力は不要。</p>
-      <pre><code>ユーザー: 「このPDFからテキストを抽出して要約して」
-  ↓
-Claude(内部): pdf スキルの説明に合致 → SKILL.md を読み込み → 抽出スクリプト実行</code></pre>
-
-      <h3>② 明示的に呼び出す</h3>
-      <pre><code><span class="tok-c"># Claude Code でスラッシュ呼び出し</span>
-/processing-pdfs
-
-<span class="tok-c"># プラグイン内スキルは名前空間付き</span>
-/my-plugin:hello
-
-<span class="tok-c"># 引数を渡す（SKILL.md内の $ARGUMENTS が受け取る）</span>
-/greeting Alex</code></pre>
-
-      <h3>③ API（container で指定）</h3>
-      <pre><code>container={
-  <span class="tok-s">"skills"</span>: [
-    {<span class="tok-s">"type"</span>:<span class="tok-s">"anthropic"</span>, <span class="tok-s">"skill_id"</span>:<span class="tok-s">"pptx"</span>, <span class="tok-s">"version"</span>:<span class="tok-s">"latest"</span>},
-    {<span class="tok-s">"type"</span>:<span class="tok-s">"custom"</span>, <span class="tok-s">"skill_id"</span>:<span class="tok-s">"skill_01ABC..."</span>, <span class="tok-s">"version"</span>:<span class="tok-s">"latest"</span>}
-  ]
-}</code></pre>
-      <p>事前ビルド済みは短いID（<code>pptx</code>等）、カスタムは <code>skill_01...</code> 形式のIDで指定します。指定後は関連タスクで自動的に使われます。</p>
-    </section>
-
-    <!-- 06 -->
+    <!-- 1.4 -->
     <section id="vs">
-      <h2><span class="sec-num">06</span>CLAUDE.md / MCP との違い</h2>
+      <h2 class="sub-h"><span class="sec-num">1.4</span>似た機能との違い（CLAUDE.md / MCP）</h2>
       <p>名前が似ていて混乱しやすい3つですが、役割はハッキリ違います。まずは<strong>たとえ話</strong>でイメージをつかみましょう。</p>
       <div class="callout tip">
         <p>Claudeを“新しく来たスタッフ”にたとえると——</p>
         <ul style="margin:6px 0 0">
           <li><strong>CLAUDE.md</strong>＝<em>「社内のルールブック」</em>。出社したら毎回まず目を通す、いつも守ってほしい決まりごと。</li>
           <li><strong>スキル</strong>＝<em>「業務マニュアル集」</em>。必要なときに棚から取り出して見る、特定作業のやり方。</li>
-          <li><strong>MCP</strong>＝<em>「社内システムへのアクセス権」</em>。在庫DBやSlackなどにつないでリアルタイムでデータをやりとりするためのID。</li>
+          <li><strong>MCP</strong>＝<em>「社内システムへのアクセス権」</em>。在庫DBやSlackなどにつないで、その場の最新データをやりとりするためのID。</li>
         </ul>
       </div>
-      <p>もう少しきちんと言うと、3つは<strong>役割の違う、補い合う機能</strong>です。「いつ読み込まれるか」と「何に使うか」で整理すると分かりやすいです。</p>
+      <p>もう少しきちんと整理すると、次のようになります。</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>機能</th><th>置き場所</th><th>ロード方式</th><th>主な用途</th></tr></thead>
+          <thead><tr><th>機能</th><th>いつ読み込まれる？</th><th>何に使う？</th></tr></thead>
           <tbody>
-            <tr><td><strong>CLAUDE.md</strong></td><td>プロジェクトルート等</td><td>セッション開始時に<strong>全文</strong>を読む（高い先行コスト）</td><td>常に知っておくべき前提：コーディング規約・設計方針・チームの好み</td></tr>
-            <tr><td><strong>Skills</strong></td><td><code>.claude/skills/</code> / API</td><td>説明だけ常駐し、合致時に<strong>遅延ロード</strong></td><td>再利用したい手順・専門知識・複雑な多段ワークフロー</td></tr>
-            <tr><td><strong>MCP</strong></td><td>外部サーバ / ローカルCLI</td><td>ツール名のみ常駐、スキーマは遅延（tool search）</td><td>外部システムへの<strong>リアルタイム接続</strong>（GitHub・DB・Slack等）</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="cards">
-        <div class="card">
-          <h4>CLAUDE.md を使う時</h4>
-          <p>毎回必要な前提。「常にTypeScript」「このスタイルに従う」など、セッションを通じて一定のコンテキスト。</p>
-        </div>
-        <div class="card">
-          <h4>Skills を使う時</h4>
-          <p>磨き上げた多段ワークフロー、説明の長い専門知識、プロジェクト横断で再利用したい手順。文脈を軽く保ちたい時。</p>
-        </div>
-        <div class="card">
-          <h4>MCP を使う時</h4>
-          <p>ライブAPI接続が要る、頻繁に変わるデータ（issue・ログ・DB）、別アプリで開くようなサービス連携。</p>
-        </div>
-      </div>
-
-      <div class="callout tip">
-        <p><strong>3つは一緒に使うのが理想：</strong> <em>CLAUDE.md</em> が「このプロジェクトはTS・RESTアーキ・Jest」と前提を示し、<em>Skill</em> が「BigQuery分析の手順＋テーブルスキーマ」を提供し、<em>MCP</em> が「GitHubのissueやライブDB」へ接続する。役割分担すれば文脈も軽く、能力も高くなります。スキルが MCP ツールを呼ぶ手順を書く、といった連携も可能です（公式の <a href="https://github.com/anthropics/skills/tree/main/skills/mcp-builder" target="_blank">mcp-builder</a> はMCPサーバ作成を支援するスキル）。</p>
-      </div>
-      <div class="linkbox">
-        <h4>🔗 この章の関連リンク</h4>
-        <ul>
-          <li><a href="https://code.claude.com/docs/en/memory" target="_blank">CLAUDE.md（メモリ機能）の公式ドキュメント</a></li>
-          <li><a href="https://code.claude.com/docs/en/mcp" target="_blank">Model Context Protocol（MCP）の公式ドキュメント</a></li>
-          <li><a href="https://modelcontextprotocol.io/" target="_blank">MCP 公式サイト（仕様・サーバ一覧）</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 07 -->
-    <section id="examples">
-      <h2><span class="sec-num">07</span>実際の事例・ユースケース</h2>
-
-      <h3>Anthropic 公式・事前ビルド済みのドキュメントスキル</h3>
-      <div class="cards">
-        <div class="card"><h4>pptx</h4><p>PowerPointの作成・編集。「再生可能エネルギーのプレゼン作って」</p></div>
-        <div class="card"><h4>xlsx</h4><p>Excelの作成・分析・グラフ生成。「売上トラッキング表を作って」</p></div>
-        <div class="card"><h4>docx</h4><p>Word文書の作成・編集・整形。「2ページのレポートを書いて」</p></div>
-        <div class="card"><h4>pdf</h4><p>PDFの生成・抽出・フォーム記入。「請求書PDFのテンプレを作って」</p></div>
-      </div>
-      <p>これらは <a href="https://github.com/anthropics/skills" target="_blank">anthropics/skills</a> リポジトリで<strong>参照実装として公開</strong>されています（document系はソース公開だがOSSライセンスではない点に注意）。次章で全17スキルを一覧します。</p>
-
-      <h3>カスタム／実務での例</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>スキル</th><th>用途</th><th>構成の工夫</th></tr></thead>
-          <tbody>
-            <tr><td><strong>財務分析</strong></td><td>BigQueryで売上・パイプライン・製品指標を集計</td><td><code>finance.md</code> <code>sales.md</code> <code>product.md</code> に分割。テーブルスキーマ・命名規則・フィルタ規則を同梱</td></tr>
-            <tr><td><strong>PDFフォーム記入</strong></td><td>フィールド抽出→マッピング→検証→記入→確認</td><td><code>analyze_form.py</code> 等のスクリプト＋ <code>FORMS.md</code> を遅延ロード</td></tr>
-            <tr><td><strong>コードレビュー</strong></td><td>構造・エラー処理・セキュリティ・テスト網羅を点検</td><td>GitHub MCP と組み合わせてライブPRレビューに拡張可能</td></tr>
+            <tr><td><strong>CLAUDE.md</strong></td><td>会話のはじめに<strong>全文</strong></td><td>毎回守ってほしい前提：書き方ルール・方針・好み</td></tr>
+            <tr><td><strong>Skills</strong></td><td>説明だけ常駐し、合致時に<strong>必要な分だけ</strong></td><td>くり返し使う作業手順・専門知識</td></tr>
+            <tr><td><strong>MCP</strong></td><td>道具名だけ常駐、使う時に詳細</td><td>外部サービスとの<strong>リアルタイム接続</strong>（GitHub・DB・Slack等）</td></tr>
           </tbody>
         </table>
       </div>
       <div class="callout note">
-        <p><strong>育て方のコツ：</strong> 最初は <code>formatting-sales-reports</code> のように<strong>狭く</strong>作り、パターンが安定してから <code>sales-operations</code> のように統合する。統合は「広いスキルが3つの狭いスキルと同等に動く」と評価（eval）で確認できた時だけ行います。</p>
+        <p><strong>3つは一緒に使うのが理想：</strong> <em>CLAUDE.md</em> で前提を示し、<em>スキル</em> で作業手順を渡し、<em>MCP</em> で外部データにつなぐ——役割分担すれば、軽いまま賢く動けます。スキルから MCP の道具を呼ぶこともできます。</p>
+      </div>
+      <div class="linkbox">
+        <h4>🔗 関連リンク</h4>
+        <ul>
+          <li><a href="https://code.claude.com/docs/en/memory" target="_blank">CLAUDE.md（メモリ機能）の公式ドキュメント</a></li>
+          <li><a href="https://code.claude.com/docs/en/mcp" target="_blank">MCP の公式ドキュメント</a> ／ <a href="https://modelcontextprotocol.io/" target="_blank">MCP 公式サイト</a></li>
+        </ul>
       </div>
     </section>
 
-    <!-- 08 公式スキルカタログ -->
-    <section id="catalog">
-      <h2><span class="sec-num">08</span>公式スキル17種カタログ（便利なスキル例）</h2>
-      <p>Anthropic は <a href="https://github.com/anthropics/skills/tree/main/skills" target="_blank">anthropics/skills</a> リポジトリで、実務で使える<strong>17種のスキルを参照実装として公開</strong>しています。各スキル名のリンクからGitHub上の実装（SKILL.md・スクリプト・参照ファイル）をそのまま読めます。カテゴリ別に紹介します。</p>
+    <!-- 1.5 -->
+    <section id="pros">
+      <h2 class="sub-h"><span class="sec-num">1.5</span>メリットと注意点</h2>
+      <h3>うれしいところ</h3>
+      <ul>
+        <li><strong>専門家になれる</strong>：何でも屋のClaudeを、特定分野のプロに変身させられる。</li>
+        <li><strong>使い回せる</strong>：一度作れば、別の会話やプロジェクトでも使える。</li>
+        <li><strong>軽い</strong>：必要なときだけ開くので、たくさん資料を入れても重くならない。</li>
+        <li><strong>勝手に気づく</strong>：依頼の内容に合うスキルを、Claudeが自動で選んで使ってくれる。</li>
+      </ul>
+      <h3>気をつけたいところ</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>注意点</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td>環境ごとに別管理</td><td>Claude Code / API / Claude.ai の間で自動同期しない。場所ごとに入れ直しが必要。</td></tr>
+            <tr><td>共有範囲の違い</td><td>Claude.aiは個人だけ。APIはチーム（ワークスペース）全体。Codeは個人/プロジェクト/プラグイン。</td></tr>
+            <tr><td>制限</td><td>API利用では1回の依頼につき最大8スキルまで、など細かな制限あり。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout danger">
+        <p><strong>セキュリティの注意：スキルはプログラムを実行できます。</strong> 知らない人が作ったスキルを入れるのは「出どころ不明のアプリをインストールする」のと同じリスクがあります。<strong>信頼できる出どころ（自分で作ったもの／Anthropic公式）だけ</strong>を使い、入れる前に中身（SKILL.md・スクリプト）に目を通しましょう。心配なら「このスキル、安全か中身を確認して」とClaudeに頼むのも有効です。</p>
+      </div>
+      <div class="linkbox">
+        <h4>🔗 関連リンク</h4>
+        <ul>
+          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise" target="_blank">Skills for Enterprise（ガバナンス・セキュリティ審査）</a></li>
+        </ul>
+      </div>
+    </section>
 
-      <h3>📄 ドキュメント（Document）</h3>
+    <!-- ============ PART 2 ============ -->
+    <div class="part" id="part2">
+      <div class="pt-label">PART 2</div>
+      <h2><span class="pt-no">2</span>Skills を使う</h2>
+      <p class="pt-desc">既にあるスキルを実際に使ってみるパート。どこで使えて、どんな便利なスキルがあり、どう入れて、どう呼び出すか。</p>
+    </div>
+
+    <!-- 2.1 -->
+    <section id="where">
+      <h2 class="sub-h"><span class="sec-num">2.1</span>どこで使える？</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>環境</th><th>用意済みスキル</th><th>自分のスキルの置き場</th><th>共有範囲</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Claude Code（CLI）</strong></td><td>プラグイン経由</td><td><code>~/.claude/skills/</code>（個人）／<code>.claude/skills/</code>（プロジェクト）</td><td>個人・プロジェクト・チーム共有</td></tr>
+            <tr><td><strong>Claude API</strong></td><td>pdf, docx, pptx, xlsx</td><td>アップロードで登録</td><td>チーム全体</td></tr>
+            <tr><td><strong>Claude.ai（Web/アプリ）</strong></td><td>自動（裏で利用）</td><td>設定からzipでアップロード</td><td>個人のみ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <p><strong>環境をまたいだ同期はありません。</strong> たとえばClaude Codeに入れたスキルは、Claude.aiには出てきません。チームで共有したいときは、後半の<a href="#distribute">「チームに配る」</a>を参照してください。</p>
+      </div>
+    </section>
+
+    <!-- 2.2 -->
+    <section id="catalog">
+      <h2 class="sub-h"><span class="sec-num">2.2</span>便利なスキル17種カタログ</h2>
+      <p>Anthropic は <a href="https://github.com/anthropics/skills/tree/main/skills" target="_blank">公式リポジトリ</a>で、実務に使える<strong>17種のスキルを公開</strong>しています。各スキル名のリンクから、実物（中身）をそのまま見られます。「こんなことができるんだ」という発見に。</p>
+
+      <h3>📄 書類づくり（Document）</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>スキル</th><th>できること</th></tr></thead>
         <tbody>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/pdf" target="_blank"><code>pdf</code></a></td><td>PDFのテキスト/表抽出・フォーム記入・結合・生成</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/pdf" target="_blank"><code>pdf</code></a></td><td>PDFの作成・テキスト/表の抽出・フォーム記入・結合</td></tr>
           <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/docx" target="_blank"><code>docx</code></a></td><td>Word文書の作成・編集・書式設定</td></tr>
           <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/pptx" target="_blank"><code>pptx</code></a></td><td>PowerPointスライドの作成・編集</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/xlsx" target="_blank"><code>xlsx</code></a></td><td>Excelの作成・データ分析・ピボット/グラフ生成</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/doc-coauthoring" target="_blank"><code>doc-coauthoring</code></a></td><td>提案書・技術仕様・意思決定ドキュメントを構造化ワークフローで共同執筆</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/xlsx" target="_blank"><code>xlsx</code></a></td><td>Excelの作成・データ分析・グラフ生成</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/doc-coauthoring" target="_blank"><code>doc-coauthoring</code></a></td><td>提案書・仕様書などを対話しながら共同執筆</td></tr>
         </tbody>
       </table></div>
 
-      <h3>🎨 クリエイティブ＆デザイン（Creative &amp; Design）</h3>
+      <h3>🎨 デザイン・アート（Creative &amp; Design）</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>スキル</th><th>できること</th></tr></thead>
         <tbody>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/canvas-design" target="_blank"><code>canvas-design</code></a></td><td>デザイン原則に基づき .png/.pdf のポスター・アート作品を制作</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/algorithmic-art" target="_blank"><code>algorithmic-art</code></a></td><td>p5.js でジェネラティブ／アルゴリズミックアート（フローフィールド・パーティクル等）を生成</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/theme-factory" target="_blank"><code>theme-factory</code></a></td><td>スライド・ドキュメント・LP等に10種のプリセットテーマ（配色/フォント）を適用、または新規テーマ生成</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/slack-gif-creator" target="_blank"><code>slack-gif-creator</code></a></td><td>Slack向けに最適化したアニメーションGIFを制約・検証付きで作成</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/canvas-design" target="_blank"><code>canvas-design</code></a></td><td>ポスターやアート作品を .png/.pdf で制作</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/algorithmic-art" target="_blank"><code>algorithmic-art</code></a></td><td>p5.js でジェネラティブアート（自動生成アート）を作る</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/theme-factory" target="_blank"><code>theme-factory</code></a></td><td>スライドや資料に10種のテーマ（配色・フォント）を適用</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/slack-gif-creator" target="_blank"><code>slack-gif-creator</code></a></td><td>Slack向けに最適化したアニメGIFを作る</td></tr>
         </tbody>
       </table></div>
 
-      <h3>💻 開発＆技術（Development &amp; Technical）</h3>
+      <h3>💻 開発・技術（Development &amp; Technical）</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>スキル</th><th>できること</th></tr></thead>
         <tbody>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/skill-creator" target="_blank"><code>skill-creator</code></a></td><td><strong>スキルを作る・改善する・評価するスキル</strong>。新規作成、編集、eval実行、説明文の発火精度最適化まで</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/mcp-builder" target="_blank"><code>mcp-builder</code></a></td><td>高品質なMCPサーバ（Python FastMCP / Node・TS SDK）の構築ガイド</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/claude-api" target="_blank"><code>claude-api</code></a></td><td>Claude API / Anthropic SDKアプリの構築・デバッグ・最適化、モデル間移行。prompt caching を内蔵</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/frontend-design" target="_blank"><code>frontend-design</code></a></td><td>「いかにもAI」を避けた、洗練された本番品質のフロントエンドUIを生成</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/web-artifacts-builder" target="_blank"><code>web-artifacts-builder</code></a></td><td>React/Tailwind/shadcn-ui を使った複雑なclaude.ai HTMLアーティファクトを構築</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/webapp-testing" target="_blank"><code>webapp-testing</code></a></td><td>Playwrightでローカルwebアプリを操作・テスト。スクショ・ログ取得・UIデバッグ</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/skill-creator" target="_blank"><code>skill-creator</code></a></td><td><strong>スキルを作る・改善する・評価するスキル</strong>（=スキルを作るためのスキル）</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/mcp-builder" target="_blank"><code>mcp-builder</code></a></td><td>MCPサーバ（外部連携の仕組み）を作る手助け</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/claude-api" target="_blank"><code>claude-api</code></a></td><td>Claude API を使うアプリの構築・デバッグ・最適化</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/frontend-design" target="_blank"><code>frontend-design</code></a></td><td>洗練されたWeb画面（UI）を生成</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/web-artifacts-builder" target="_blank"><code>web-artifacts-builder</code></a></td><td>React等を使った複雑なWebアプリ部品を構築</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/webapp-testing" target="_blank"><code>webapp-testing</code></a></td><td>Webアプリの動作テスト・画面キャプチャ</td></tr>
         </tbody>
       </table></div>
 
-      <h3>🏢 エンタープライズ＆コミュニケーション（Enterprise &amp; Communication）</h3>
+      <h3>🏢 仕事・社内コミュニケーション（Enterprise）</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>スキル</th><th>できること</th></tr></thead>
         <tbody>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/brand-guidelines" target="_blank"><code>brand-guidelines</code></a></td><td>成果物に企業のブランドカラー・タイポグラフィ・デザイン基準を適用（Anthropic例）</td></tr>
-          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/internal-comms" target="_blank"><code>internal-comms</code></a></td><td>ステータス報告・経営層向け更新・社内ニュースレター・インシデント報告等を自社フォーマットで作成</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/brand-guidelines" target="_blank"><code>brand-guidelines</code></a></td><td>成果物に会社のブランドカラー・フォントを適用</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/internal-comms" target="_blank"><code>internal-comms</code></a></td><td>社内報・状況報告・インシデント報告などを自社の形式で作成</td></tr>
         </tbody>
       </table></div>
-
-      <div class="callout tip">
-        <p><strong>「スキルを探す／作る」入口：</strong> まずは <a href="https://github.com/anthropics/skills/tree/main/skills/skill-creator" target="_blank">skill-creator</a> を入れて Claude にスキルを作らせるのが近道。コミュニティ製スキルを探すなら <a href="https://github.com/anthropics/skills" target="_blank">公式リポジトリ</a> のほか、有志がまとめる "awesome-claude-skills" 系リポジトリも入口になります（導入前のセキュリティ監査は必須／→ <a href="#proscons">10章</a>）。</p>
-      </div>
     </section>
 
-    <!-- 09 実装方法 -->
+    <!-- 2.3 -->
     <section id="install">
-      <h2><span class="sec-num">09</span>実装方法（実際の導入手順）</h2>
-
-      <div class="callout tip">
-        <p><strong>いちばんかんたんなのは「Claudeに聞くこと」です。🗣️</strong></p>
-        <p>下のコマンドが少しむずかしく感じても心配いりません。Claude（Claude Code や Claude.ai）に、ふつうの言葉でこう頼んでみてください：</p>
-        <p style="margin:8px 0;padding:10px 14px;background:#fff;border:1px dashed var(--border2);border-radius:8px;color:var(--fg)">「<strong>ClaudeのスキルをこのPCに入れたいです。私の環境を確認しながら、手順を1つずつ教えてください</strong>」</p>
-        <p>すると、<strong>あなたのパソコンの状態を調べて、必要なコマンドを1つずつ・コピペできる形で案内し、つまずいたら一緒に解決</strong>してくれます。以下はその「中身」を知りたい方向けの参考手順です。読み飛ばしても、Claudeに任せれば導入できます。</p>
+      <h2 class="sub-h"><span class="sec-num">2.3</span>導入のしかた</h2>
+      <div class="callout ask">
+        <p><strong>いちばんかんたんなのは「Claudeに聞くこと」です。</strong></p>
+        <p>下の手順がむずかしく感じても大丈夫。Claudeにふつうの言葉でこう頼んでみてください：</p>
+        <p class="askbox">「<strong>ClaudeのスキルをこのPCに入れたいです。私の環境を確認しながら、手順を1つずつ教えてください</strong>」</p>
+        <p>すると<strong>あなたのパソコンの状態を調べて、必要な操作を1つずつ・コピペできる形で案内し、つまずいたら一緒に解決</strong>してくれます。以下は「中身を知りたい人」向けの参考です。読み飛ばしてOK。</p>
       </div>
 
-      <h3>A. Claude Code に導入する</h3>
-      <h4>方法① 公式リポジトリから手動でコピー（最も確実）</h4>
-      <pre><code><span class="tok-c"># 公式リポジトリを取得</span>
+      <h3>A. Claude Code に入れる</h3>
+      <h4>方法① 公式リポジトリからコピー（確実）</h4>
+      <pre><code><span class="tok-c"># 公式スキル集を入手</span>
 git clone https://github.com/anthropics/skills.git
 
-<span class="tok-c"># 使いたいスキルを ~/.claude/skills/ にコピー（例: pdf と skill-creator）</span>
+<span class="tok-c"># 使いたいスキルを ~/.claude/skills/ にコピー（例：pdf と skill-creator）</span>
 mkdir -p ~/.claude/skills
-cp -r skills/skills/pdf          ~/.claude/skills/
+cp -r skills/skills/pdf           ~/.claude/skills/
 cp -r skills/skills/skill-creator ~/.claude/skills/
 
-<span class="tok-c"># Claude Code を再起動 → /pdf や /skill-creator が使えるようになる</span></code></pre>
-      <p>プロジェクト限定にしたい場合は <code>~/.claude/skills/</code> ではなく、リポジトリ内の <code>.claude/skills/</code> に置きます（チームでGit共有可能）。</p>
+<span class="tok-c"># Claude Code を再起動 → /pdf や /skill-creator が使える</span></code></pre>
 
-      <h4>方法② プラグインとして導入（マーケットプレイス経由）</h4>
-      <pre><code><span class="tok-c"># マーケットプレイス（GitHubリポジトリ）を登録</span>
+      <h4>方法② プラグインとして入れる</h4>
+      <pre><code><span class="tok-c"># スキル集（GitHub）をマーケットプレイスとして登録</span>
 /plugin marketplace add anthropics/skills
 
-<span class="tok-c"># プラグインを検索・インストール</span>
-/plugin install &lt;plugin-name&gt;@anthropics-skills
+<span class="tok-c"># プラグインを検索して導入</span>
+/plugin install &lt;plugin-name&gt;@anthropics-skills</code></pre>
 
-<span class="tok-c"># プラグイン内のスキルは名前空間付きで呼ぶ</span>
-/&lt;plugin&gt;:&lt;skill&gt;</code></pre>
-      <p>社内専用のスキル集を配る場合は、社内GitHubに <code>.claude-plugin/marketplace.json</code> を置き <code>/plugin marketplace add your-org/internal-plugins</code> で登録します（→ <a href="#distribute">11章</a>）。</p>
-
-      <h3>B. Claude API に導入する（Python）</h3>
+      <h3>B. Claude API で使う（開発者向け・Python）</h3>
       <pre><code><span class="tok-k">import</span> anthropic
-<span class="tok-k">from</span> anthropic.lib <span class="tok-k">import</span> files_from_dir
-
 client = anthropic.Anthropic()
 
-<span class="tok-c"># ① カスタムスキルをアップロード（ローカルのスキルフォルダを登録）</span>
-skill = client.beta.skills.<span class="tok-f">create</span>(
-    display_title=<span class="tok-s">"Financial Analysis"</span>,
-    files=<span class="tok-f">files_from_dir</span>(<span class="tok-s">"./financial_analysis_skill"</span>),
-)
-
-<span class="tok-c"># ② メッセージで skill を有効化（公式pdf + 自作skillを併用）</span>
 resp = client.beta.messages.<span class="tok-f">create</span>(
     model=<span class="tok-s">"claude-opus-4-8"</span>,
     max_tokens=<span class="tok-s">16000</span>,
     betas=[<span class="tok-s">"code-execution-2025-08-25"</span>, <span class="tok-s">"skills-2025-10-02"</span>],
     tools=[{<span class="tok-s">"type"</span>:<span class="tok-s">"code_execution_20250825"</span>, <span class="tok-s">"name"</span>:<span class="tok-s">"code_execution"</span>}],
     container={<span class="tok-s">"skills"</span>:[
-        {<span class="tok-s">"type"</span>:<span class="tok-s">"anthropic"</span>, <span class="tok-s">"skill_id"</span>:<span class="tok-s">"pdf"</span>,        <span class="tok-s">"version"</span>:<span class="tok-s">"latest"</span>},
-        {<span class="tok-s">"type"</span>:<span class="tok-s">"custom"</span>,    <span class="tok-s">"skill_id"</span>:skill.id, <span class="tok-s">"version"</span>:<span class="tok-s">"latest"</span>},
+        {<span class="tok-s">"type"</span>:<span class="tok-s">"anthropic"</span>, <span class="tok-s">"skill_id"</span>:<span class="tok-s">"pdf"</span>, <span class="tok-s">"version"</span>:<span class="tok-s">"latest"</span>},
     ]},
     messages=[{<span class="tok-s">"role"</span>:<span class="tok-s">"user"</span>, <span class="tok-s">"content"</span>:<span class="tok-s">"四半期レポートのPDFを作って"</span>}],
 )</code></pre>
-      <p>事前ビルド済みスキルのIDは <code>pdf</code> <code>docx</code> <code>pptx</code> <code>xlsx</code>。カスタムは <code>skill_01...</code>。1リクエスト最大8スキルまで。</p>
+      <p class="devnote">用意済みスキルのIDは <code>pdf</code> <code>docx</code> <code>pptx</code> <code>xlsx</code>。自作スキルのアップロード方法は<a href="#distribute">「チームに配る」</a>で扱います。</p>
 
-      <h3>C. Claude.ai（Web/デスクトップ）に導入する</h3>
+      <h3>C. Claude.ai（Web/アプリ）に入れる</h3>
       <ol>
-        <li>スキルフォルダ（<code>SKILL.md</code> を含む）を <strong>zip圧縮</strong>する。</li>
-        <li>Claude.ai の <strong>Settings → Capabilities/Features</strong> から <strong>Skills</strong> を開く（コード実行が有効なPro/Max/Team/Enterpriseプラン）。</li>
-        <li>zipを<strong>アップロード</strong>して有効化。以降、関連する依頼で自動的に使われる。</li>
+        <li>スキルのフォルダ（<code>SKILL.md</code> を含む）を <strong>zip圧縮</strong>。</li>
+        <li>Claude.ai の <strong>設定 → Capabilities / Features</strong> から <strong>Skills</strong> を開く（コード実行が使えるPro/Max/Team/Enterpriseプラン）。</li>
+        <li>zipを<strong>アップロード</strong>。以降、関連する依頼で自動的に使われます。</li>
       </ol>
-      <div class="callout warn">
-        <p>Claude.ai にアップロードしたスキルは<strong>その個人アカウント限定</strong>で、API や Claude Code とは同期しません。チーム配布は B（API・ワークスペース共有）か、A方法②＋社内マーケットプレイスが向いています。</p>
+      <div class="linkbox">
+        <h4>🔗 関連リンク</h4>
+        <ul>
+          <li><a href="https://code.claude.com/docs/en/skills" target="_blank">Claude Code: スキルの使い方</a></li>
+          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart" target="_blank">API クイックスタート</a></li>
+          <li><a href="https://support.claude.com/en/articles/12512212-getting-started-with-skills-on-claude-ai" target="_blank">Claude.ai ヘルプ: スキルの始め方</a></li>
+        </ul>
       </div>
+    </section>
 
-      <h3>D. 自作スキルのひな形を1分で作る</h3>
+    <!-- 2.4 -->
+    <section id="invoke">
+      <h2 class="sub-h"><span class="sec-num">2.4</span>呼び出し方</h2>
+      <h3>① 自動で呼ばれる（基本）</h3>
+      <p>あなたの依頼がスキルの説明に合えば、Claudeが<strong>自動で</strong>スキルを開いて使います。特別な操作は不要です。</p>
+      <pre><code>あなた: 「このPDFからテキストを抜き出して要約して」
+  ↓
+Claude: pdf スキルが該当 → 自動で開いて抽出・要約</code></pre>
+      <h3>② 自分で指定して呼ぶ</h3>
+      <pre><code><span class="tok-c"># Claude Code でスラッシュ呼び出し</span>
+/processing-pdfs
+
+<span class="tok-c"># プラグイン内のスキルは「プラグイン名:スキル名」</span>
+/my-plugin:hello</code></pre>
+    </section>
+
+    <!-- 2.5 -->
+    <section id="examples">
+      <h2 class="sub-h"><span class="sec-num">2.5</span>活用事例</h2>
+      <div class="cards">
+        <div class="card"><h4>📊 財務分析</h4><p>社内データベースに問い合わせて売上や指標を集計。テーブルの構造や用語の決まりをスキルに同梱しておく。</p></div>
+        <div class="card"><h4>📝 PDFフォーム記入</h4><p>項目を読み取り→記入→確認まで自動化。記入ルールを別ファイルに分けて必要時だけ参照。</p></div>
+        <div class="card"><h4>🔍 コードレビュー</h4><p>構造・エラー処理・セキュリティを点検。GitHub(MCP)と組み合わせて実際のレビューにも。</p></div>
+        <div class="card"><h4>📣 社内文書</h4><p>状況報告や社内報を、自社のいつものフォーマットで作成（公式の internal-comms が好例）。</p></div>
+      </div>
+      <div class="callout note">
+        <p><strong>育て方のコツ：</strong> 最初は「売上レポート整形」のように<strong>小さく狭く</strong>作り、慣れてきたら関連スキルをまとめて「営業業務セット」のように育てるのがおすすめです。</p>
+      </div>
+    </section>
+
+    <!-- ============ PART 3 ============ -->
+    <div class="part" id="part3">
+      <div class="pt-label">PART 3</div>
+      <h2><span class="pt-no">3</span>Skills を作る・配る</h2>
+      <p class="pt-desc">自分だけのスキルを作るパート。難しく考えず、Claudeに手伝ってもらえばOK。作り方のコツとチーム共有を紹介します。</p>
+    </div>
+
+    <!-- 3.1 -->
+    <section id="create">
+      <h2 class="sub-h"><span class="sec-num">3.1</span>作り方の流れ</h2>
+      <div class="callout ask">
+        <p><strong>作るのもClaudeにおまかせできます。</strong> 「<em>こういう作業を覚えるスキルを作って</em>」と頼めば、フォルダとファイルのひな形を作ってくれます。公式の <a href="https://github.com/anthropics/skills/tree/main/skills/skill-creator" target="_blank">skill-creator</a>（スキルを作るスキル）を入れておくと、より本格的に作成・改善できます。</p>
+      </div>
+      <p>自分で作るときの基本の流れはこうです。</p>
+      <ol>
+        <li><strong>くり返している作業を見つける</strong>：毎回同じ指示を出している＝スキル化のチャンス。</li>
+        <li><strong>フォルダを作る</strong>：<code>~/.claude/skills/スキル名/</code></li>
+        <li><strong>SKILL.md を書く</strong>：名前・説明（次の3.2）＋手順。</li>
+        <li><strong>必要なら資料やプログラムを足す</strong>：<code>references/</code> <code>scripts/</code> など。</li>
+        <li><strong>試して直す</strong>：実際に使ってみて、説明文や手順を調整。</li>
+      </ol>
+    </section>
+
+    <!-- 3.2 -->
+    <section id="desc">
+      <h2 class="sub-h"><span class="sec-num">3.2</span>説明文（description）の書き方</h2>
+      <p>説明文は、スキルが<strong>使われるかどうかを左右する一番大事な部分</strong>です。Claudeはこの一文を見て「使うべきか」を判断します。コツは「<strong>何をするか</strong>」＋「<strong>いつ使うか</strong>」をセットで、具体的に書くこと。</p>
+      <div class="cards">
+        <div class="card">
+          <h4>✅ 良い例</h4>
+          <p>「PDFからテキストや表を抽出し、フォーム記入や結合を行う。<strong>PDF・フォーム・書類の抽出</strong>が話題に出たら使う。」</p>
+        </div>
+        <div class="card">
+          <h4>❌ 惜しい例</h4>
+          <p>「書類を手伝う」（ふんわりしすぎ）／「データを処理する」（いつ使うか不明）</p>
+        </div>
+      </div>
+      <p>そのほかのコツ：</p>
+      <ul>
+        <li>本文は<strong>長すぎない</strong>（目安500行以内）。詳しい内容は別ファイルに分けて、必要時だけ読ませる。</li>
+        <li>別ファイルの参照は<strong>1段だけ</strong>（深い入れ子は読み落とされやすい）。</li>
+        <li>ファイル名は中身がわかる名前に（<code>doc2.md</code> ではなく <code>form_rules.md</code>）。</li>
+      </ul>
+      <div class="linkbox">
+        <h4>🔗 関連リンク</h4>
+        <ul>
+          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices" target="_blank">Agent Skills Best Practices（公式の作成ガイド）</a></li>
+          <li><a href="https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf" target="_blank">The Complete Guide to Building Skills（PDF・完全ガイド）</a></li>
+          <li><a href="https://anthropic.skilljar.com/introduction-to-agent-skills" target="_blank">無料コース: Introduction to agent skills</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3.3 -->
+    <section id="template">
+      <h2 class="sub-h"><span class="sec-num">3.3</span>1分でひな形を作る</h2>
+      <p>手を動かしてみたい方向けに、コピペで動く最小例です（Claude Code）。</p>
       <pre><code>mkdir -p ~/.claude/skills/release-notes
 cat &gt; ~/.claude/skills/release-notes/SKILL.md &lt;&lt;'EOF'
 ---
 name: release-notes
-description: Draft release notes from a git commit range in our house style.
-  Use when the user asks for release notes, changelog, or "まとめてリリースノート".
+description: gitのコミット履歴から、自社の体裁でリリースノートを作る。
+  「リリースノート」「変更点まとめ」を頼まれたら使う。
 ---
 
 # Release Notes Writer
 
-1. `git log <prev>..<head> --oneline` で対象コミットを収集
-2. Features / Fixes / Breaking changes に分類
-3. references/style.md のトーンに従って Markdown で出力
+1. `git log <前>..<今> --oneline` で対象コミットを集める
+2. 新機能 / 修正 / 重要な変更 に分類する
+3. Markdown で見やすくまとめて出力する
 EOF
-<span class="tok-c"># Claude Code を再起動 → /release-notes で利用可能</span></code></pre>
-      <div class="linkbox">
-        <h4>🔗 この章の関連リンク</h4>
-        <ul>
-          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart" target="_blank">Agent Skills Quickstart（APIで使い始める）</a></li>
-          <li><a href="https://platform.claude.com/docs/en/build-with-claude/skills-guide" target="_blank">Using Skills with the Claude API（アップロード・バージョン管理）</a></li>
-          <li><a href="https://code.claude.com/docs/en/plugins" target="_blank">Claude Code Plugins（プラグイン化とマーケットプレイス）</a></li>
-          <li><a href="https://github.com/anthropics/skills/blob/main/README.md" target="_blank">anthropics/skills README（導入方法の一次情報）</a></li>
-        </ul>
-      </div>
+<span class="tok-c"># Claude Code を再起動 → /release-notes で使える</span></code></pre>
+      <p>API で自作スキルを登録したい場合は、フォルダごとアップロードします（開発者向け）。</p>
+      <pre><code><span class="tok-k">from</span> anthropic.lib <span class="tok-k">import</span> files_from_dir
+skill = client.beta.skills.<span class="tok-f">create</span>(
+    display_title=<span class="tok-s">"Release Notes"</span>,
+    files=<span class="tok-f">files_from_dir</span>(<span class="tok-s">"./release-notes"</span>),
+)  <span class="tok-c"># → skill.id をメッセージの container で指定して使う</span></code></pre>
     </section>
 
-    <!-- 10 -->
-    <section id="proscons">
-      <h2><span class="sec-num">10</span>利点と欠点・制限</h2>
-
-      <h3>利点</h3>
-      <ul>
-        <li><strong>専門能力化</strong>：汎用Claudeをドメイン専門家に変える。</li>
-        <li><strong>再利用性</strong>：一度作れば会話・プロジェクトをまたいで使える。</li>
-        <li><strong>文脈効率</strong>：段階的開示で文脈を軽く保つ。大量の参照資料を同梱しても使うまで無料。</li>
-        <li><strong>自動発見</strong>：タスクに応じてClaudeが適切なスキルを自動起動。</li>
-        <li><strong>クロス環境</strong>：ファイルベースなのでCode/APIで共通の形式。</li>
-      </ul>
-
-      <h3>欠点・制限</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>項目</th><th>内容</th></tr></thead>
-          <tbody>
-            <tr><td>サーフェス間で非同期</td><td>Code / API / Claude.ai 間で自動同期しない。Gitを原本に各環境へ配布する運用が必要。</td></tr>
-            <tr><td>共有範囲の差</td><td>Claude.aiは個人のみ・組織管理なし。APIはワークスペース全体。Codeは個人/プロジェクト/プラグイン。</td></tr>
-            <tr><td>実行環境の制約</td><td>API実行環境はネットワーク非接続・追加パッケージ導入不可（プリインストールのみ）。Claude.aiはネット接続が設定依存。</td></tr>
-            <tr><td>1リクエスト最大8スキル（API）</td><td>超える場合は統合かルーティングが必要。</td></tr>
-            <tr><td>ZDR非対象</td><td>Zero Data Retentionの対象外（標準保持ポリシー）。</td></tr>
-            <tr><td>ガバナンス／バージョン管理</td><td>自動ロールバックや中央管理は組み込みでない。チェックサム・署名コミット等は自前で。</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>セキュリティ上の注意（重要）</h3>
-      <div class="callout danger">
-        <p><strong>スキルはコードを実行し、ツールにアクセスできます。</strong>信頼できないソースのスキルは「ソフトをインストールするのと同じ」リスクがあります。導入前に必ず監査してください。</p>
-      </div>
-      <ul>
-        <li><strong>脅威の例</strong>：悪意あるスクリプト実行、安全規則を回避させる指示、認証情報のハードコード、パストラバーサル（<code>../</code>）、外部URLへのデータ送信。</li>
-        <li><strong>対策</strong>：信頼できる出所（自作 or Anthropic）のみ使う／<code>SKILL.md</code>・スクリプト・参照ファイルを全て事前レビュー／<code>http</code> <code>curl</code> <code>fetch</code> <code>requests</code> 等のネットワーク呼び出しを検索／秘密情報は環境変数や安全なストアで管理。</li>
-      </ul>
-      <div class="linkbox">
-        <h4>🔗 この章の関連リンク</h4>
-        <ul>
-          <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise" target="_blank">Skills for Enterprise（ガバナンス・セキュリティ審査・評価）</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 11 -->
+    <!-- 3.4 -->
     <section id="distribute">
-      <h2><span class="sec-num">11</span>配布・チーム共有・公開</h2>
+      <h2 class="sub-h"><span class="sec-num">3.4</span>チームに配る・共有する</h2>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>方法</th><th>仕組み</th><th>対象</th></tr></thead>
+          <thead><tr><th>方法</th><th>どんな仕組み？</th><th>向いている相手</th></tr></thead>
           <tbody>
-            <tr><td><strong>Gitリポジトリ</strong></td><td><code>.claude/skills/</code> をリポジトリに入れ、cloneして共有。PRレビュー・バージョン管理が効く</td><td>リポジトリにアクセスできるチーム</td></tr>
-            <tr><td><strong>プラグイン化</strong></td><td><code>.claude-plugin/plugin.json</code> でマニフェスト化。名前空間付きスキル（<code>/plugin:skill</code>）として配布</td><td>組織全体／公開</td></tr>
-            <tr><td><strong>公式コミュニティ</strong></td><td>審査通過後、公式カタログへ掲載（毎夜更新）</td><td>全Claude Codeユーザー</td></tr>
-            <tr><td><strong>社内マーケット</strong></td><td>社内GitHubに <code>.claude-plugin/marketplace.json</code> を置き <code>/plugin marketplace add your-org/repo</code></td><td>組織メンバー限定</td></tr>
-            <tr><td><strong>API配布</strong></td><td><code>/v1/skills</code> にアップロードしワークスペース共有</td><td>ワークスペース全員</td></tr>
+            <tr><td><strong>Gitで共有</strong></td><td><code>.claude/skills/</code> をリポジトリに入れて配る。変更履歴も残る</td><td>同じリポジトリを使うチーム</td></tr>
+            <tr><td><strong>プラグイン化</strong></td><td>マニフェストを付けて配布。<code>/plugin install</code> で導入</td><td>組織全体・社外公開</td></tr>
+            <tr><td><strong>社内マーケット</strong></td><td>社内GitHubにマーケット定義を置き <code>/plugin marketplace add</code></td><td>社内メンバー限定</td></tr>
+            <tr><td><strong>APIで共有</strong></td><td>アップロードしてワークスペース全員で利用</td><td>API利用のチーム</td></tr>
           </tbody>
         </table>
       </div>
       <div class="callout tip">
-        <p><strong>推奨運用：</strong> スキルの原本を<strong>Gitで一元管理</strong>し、そこからAPI（<code>/v1/skills</code>）・Claude Code（<code>.claude/skills/</code>）・各配布パッケージへ同期する。本番はバージョン固定＋eval通過後に昇格、開発中は <code>latest</code> やコミットSHAを使う。</p>
+        <p><strong>おすすめ運用：</strong> スキルの<strong>原本はGitで一元管理</strong>し、そこから各環境（Claude Code / API / Claude.ai）へ配る。こうすれば「どれが最新か分からない」を防げます。</p>
+      </div>
+      <div class="linkbox">
+        <h4>🔗 関連リンク</h4>
+        <ul>
+          <li><a href="https://code.claude.com/docs/en/plugins" target="_blank">Claude Code Plugins（プラグイン化・マーケットプレイス）</a></li>
+          <li><a href="https://platform.claude.com/docs/en/build-with-claude/skills-guide" target="_blank">Using Skills with the Claude API（アップロード・バージョン管理）</a></li>
+        </ul>
       </div>
     </section>
 
-    <!-- 12 -->
-    <section id="deploy">
-      <h2><span class="sec-num">12</span>このページを GitHub + Vercel で公開する</h2>
-      <p>このガイドは<strong>単一の <code>index.html</code>（外部依存なし）</strong>として作られているので、そのまま静的サイトとしてホスティングできます。チームへ共有する手順は次の通りです。</p>
+    <!-- ============ 付録 ============ -->
+    <div class="part" id="appendix">
+      <div class="pt-label">APPENDIX</div>
+      <h2><span class="pt-no" style="background:var(--fg2)">＋</span>付録</h2>
+      <p class="pt-desc">このページ自体の公開方法と、もっと深く知るための公式リンク集。</p>
+    </div>
 
-      <h4>A. GitHub にプッシュ</h4>
-      <pre><code><span class="tok-k">cd</span> claude-skills-guide
+    <!-- 付録A -->
+    <section id="deploy">
+      <h2 class="sub-h"><span class="sec-num">A</span>このページを GitHub + Vercel で公開する</h2>
+      <p>このガイドは<strong>単一の <code>index.html</code>（外部依存なし）</strong>なので、そのまま静的サイトとして公開できます。</p>
+      <pre><code><span class="tok-c"># 1) GitHub へ</span>
 git init && git add . && git commit -m <span class="tok-s">"Add Claude Skills guide"</span>
 git branch -M main
 git remote add origin https://github.com/&lt;you&gt;/&lt;repo&gt;.git
 git push -u origin main</code></pre>
-
-      <h4>B. Vercel で公開（2通り）</h4>
       <ul>
-        <li><strong>ダッシュボード</strong>：Vercel で「Add New → Project」→ 当該リポジトリをImport → フレームワークは「Other」、Build/Outputは空のままDeploy。<code>index.html</code> がそのまま配信される。</li>
-        <li><strong>CLI</strong>：<code>npm i -g vercel</code> の後、フォルダ内で <code>vercel</code>（プレビュー）／<code>vercel --prod</code>（本番）。</li>
+        <li><strong>Vercel</strong>：「Add New → Project」→ リポジトリをImport → Framework は「Other」、Build/Output は空のままDeploy。<code>index.html</code> がそのまま配信されます。</li>
+        <li>社内限定にしたい場合は Vercel の <strong>Deployment Protection</strong>（パスワード保護等）が使えます。GitHubに push するたび自動で再デプロイされます。</li>
       </ul>
-      <div class="callout note">
-        <p>ルートに <code>index.html</code> があれば設定は不要ですが、社内限定にしたい場合は Vercel の <strong>Deployment Protection</strong>（Password Protection / Vercel Authentication）を使うと、URLを知っていても許可者だけが閲覧できます。GitHub に push するたび自動で再デプロイされます。</p>
-      </div>
     </section>
 
-    <!-- Sources -->
+    <!-- 付録B -->
     <section id="sources">
-      <h2><span class="sec-num">▼</span>参考リンク集（公式中心）</h2>
-
+      <h2 class="sub-h"><span class="sec-num">B</span>参考リンク集（公式中心）</h2>
       <h4>公式ドキュメント</h4>
       <ul class="src-list">
-        <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview" target="_blank">Agent Skills Overview — Claude Docs</a></li>
-        <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart" target="_blank">Agent Skills Quickstart</a></li>
-        <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices" target="_blank">Agent Skills Best Practices</a></li>
-        <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise" target="_blank">Skills for Enterprise（ガバナンス・セキュリティ）</a></li>
-        <li><a href="https://platform.claude.com/docs/en/build-with-claude/skills-guide" target="_blank">Using Skills with the Claude API（/v1/skills）</a></li>
-        <li><a href="https://platform.claude.com/docs/en/api/skills/create-skill" target="_blank">Skills API リファレンス</a></li>
-        <li><a href="https://code.claude.com/docs/en/skills" target="_blank">Claude Code: Extend Claude with skills</a></li>
-        <li><a href="https://code.claude.com/docs/en/plugins" target="_blank">Claude Code: Plugins（配布・マーケットプレイス）</a></li>
-        <li><a href="https://support.claude.com/en/articles/12512212-getting-started-with-skills-on-claude-ai" target="_blank">Claude.ai ヘルプ: スキルの始め方</a></li>
+        <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview" target="_blank">Agent Skills Overview</a> ／ <a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart" target="_blank">Quickstart</a> ／ <a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices" target="_blank">Best Practices</a></li>
+        <li><a href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise" target="_blank">Skills for Enterprise</a> ／ <a href="https://platform.claude.com/docs/en/build-with-claude/skills-guide" target="_blank">Using Skills with the API</a> ／ <a href="https://platform.claude.com/docs/en/api/skills/create-skill" target="_blank">Skills API リファレンス</a></li>
+        <li><a href="https://code.claude.com/docs/en/skills" target="_blank">Claude Code: Skills</a> ／ <a href="https://code.claude.com/docs/en/plugins" target="_blank">Plugins</a> ／ <a href="https://support.claude.com/en/articles/12512212-getting-started-with-skills-on-claude-ai" target="_blank">Claude.ai ヘルプ</a></li>
       </ul>
-
-      <h4>公式リポジトリ・学習リソース</h4>
+      <h4>リポジトリ・学習リソース</h4>
       <ul class="src-list">
-        <li><a href="https://github.com/anthropics/skills" target="_blank">anthropics/skills（公式リポジトリ・17スキルの参照実装・仕様・テンプレ）</a></li>
-        <li><a href="https://www.anthropic.com/news/skills" target="_blank">Anthropic News: Introducing Agent Skills</a></li>
-        <li><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank">Engineering Blog: Equipping agents for the real world with Agent Skills</a></li>
-        <li><a href="https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf" target="_blank">The Complete Guide to Building Skills for Claude（PDF）</a></li>
-        <li><a href="https://anthropic.skilljar.com/introduction-to-agent-skills" target="_blank">Introduction to agent skills（無料コース）</a></li>
+        <li><a href="https://github.com/anthropics/skills" target="_blank">anthropics/skills（公式リポジトリ・17スキルの実物）</a></li>
+        <li><a href="https://www.anthropic.com/news/skills" target="_blank">Anthropic News: Introducing Agent Skills</a> ／ <a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank">Engineering Blog</a></li>
+        <li><a href="https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf" target="_blank">The Complete Guide to Building Skills（PDF）</a> ／ <a href="https://anthropic.skilljar.com/introduction-to-agent-skills" target="_blank">無料コース</a></li>
       </ul>
-
-      <h4>関連機能</h4>
-      <ul class="src-list">
-        <li><a href="https://code.claude.com/docs/en/memory" target="_blank">CLAUDE.md（メモリ機能）</a> ／ <a href="https://code.claude.com/docs/en/mcp" target="_blank">MCP（Claude Code）</a> ／ <a href="https://modelcontextprotocol.io/" target="_blank">MCP 公式サイト</a></li>
-      </ul>
-
       <div class="callout warn">
-        <p>本ガイドは2026年5月時点の公開情報に基づく要約です。ベータヘッダ名・エンドポイント・制限値・スキル一覧などは変更され得ます。実装時は必ず上記の<strong>公式ドキュメントで最新仕様を確認</strong>してください。</p>
+        <p>本ガイドは2026年時点の公開情報に基づくやさしい要約です。細かい仕様（設定名・制限値・スキル一覧など）は変わることがあります。実際の作業では<strong>公式ドキュメントで最新を確認</strong>してください。</p>
       </div>
     </section>
 
@@ -794,8 +696,7 @@ git push -u origin main</code></pre>
 <a href="#" class="back-top" id="backTop" aria-label="トップへ戻る">↑</a>
 
 <footer>
-  Claude Agent Skills 総合ガイド ｜ 単一HTML・外部依存なし ｜ 公式ドキュメントの要約（2026-05）<br>
-  GitHub + Vercel でそのまま公開できます（→ 12章参照）
+  Claude Skills やさしい総合ガイド ｜ ①とは ②使う ③作る の3部構成 ｜ 単一HTML・外部依存なし（2026年）
 </footer>
 
 <script>
